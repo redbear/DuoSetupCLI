@@ -1,10 +1,5 @@
-#ifndef COMMUNICATION_H
-#define COMMUNICATION_H
-
-// Including files
-
-
-#pragma  comment(lib,"ws2_32.lib")
+#ifndef _COMMUNICATION_H_
+#define _COMMUNICATION_H_
 
 #define DUO_SERVER_IP_ADDRESS         "192.168.0.1"
 #define DUO_SERVER_OTA_PORT           50007

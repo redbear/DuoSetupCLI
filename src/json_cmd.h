@@ -1,5 +1,5 @@
-#ifndef JSON_CMD_H
-#define JSON_CMD_H
+#ifndef _JSON_CMD_H_
+#define _JSON_CMD_H_
 
 void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size);
 void AssembleRstCmdString(char *js);

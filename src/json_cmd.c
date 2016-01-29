@@ -1,4 +1,3 @@
-
 // Including files
 #include <winsock2.h>
 #include <stdio.h>
@@ -120,7 +119,7 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len){
 	
 	SOCKET sclient;
 	if( ConnectToClient(&sclient, DUO_SERVER_IP_ADDRESS, DUO_SERVER_CMD_PORT) < 0 ){
-		return -4;
+		return -1;
 	}
 	
 	setsockopt(sclient,SOL_SOCKET,SO_SNDTIMEO,(const char*)&timeout,sizeof(timeout));
@@ -134,7 +133,7 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len){
 		printf("\nERROR: Sent request command failed!\n");
 		closesocket(sclient);
         WSACleanup();
-		return -5;
+		return -1;
 	}
 
 	// Receive respond
@@ -145,7 +144,7 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len){
 		printf("\nERROR: Receive respond timeout!\n");
 		closesocket(sclient);
 		WSACleanup();
-		return -6;
+		return -1;
 	}
 	if(cmdline_params.verbose) printf("\nReceived: %s\n", rsp);
 	

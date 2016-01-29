@@ -1,5 +1,5 @@
-#ifndef CMDLINE_PARAM_H
-#define CMDLINE_PARAM_H
+#ifndef _CMDLINE_PARAM_H_
+#define _CMDLINE_PARAM_H_
 
 typedef enum {
 	OPTION_NOT_SPECIFIED,

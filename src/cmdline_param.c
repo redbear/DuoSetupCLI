@@ -1,4 +1,3 @@
-
 // Including files
 #include <stdio.h>
 #include <string.h>
@@ -48,7 +47,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 				int fLen = strlen(argv[i]);
 				if(fLen < 5){
 					printf("\nERROR: The selcted file \"%s\" is invalid!\n\n", argv[i]);
-					return -2;  
+					return -1;  
 				}
 				format[3] = argv[i][fLen-1];
 				format[2] = argv[i][fLen-2];
@@ -56,7 +55,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 				format[0] = argv[i][fLen-4];	
 				if(0 != strcmp(form, format)){
 					printf("\nERROR: Selected file \"%s\" format must be .bin!\n\n", argv[i]);
-					return -3;
+					return -1;
 				}
 				
 				cmdline_params.file_set = 1;
@@ -65,7 +64,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 			else {
 				printf("\nERROR: File is not specified by parameter \"--file\"!\n\n");
 				PrintHelpMessage();
-				return -4;
+				return -1;
 			}
 		}
 		else if(!strcmp(argv[i], "--reset")) {    // --reset
@@ -74,7 +73,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else {
 			printf("\nERROR: Unknown option or parameter \"%s\" .\n", argv[i]);
 			PrintHelpMessage();
-			return -4;
+			return -1;
 		}
 	}
 	
@@ -82,7 +81,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 }
 
 void PrintHelpMessage(void){
-	printf("\nUsage   : %s <option> [parameters]\n\n", "DuoSetup");
+	printf("\nUsage   : %s <option> [parameters]\n\n", "DuoSetupCLI");
 	
 	printf("options: \n");
 	printf("    --upload       Upload firmware to Duo\n");

@@ -1,5 +1,3 @@
-// Compile: g++ main.c -lws2_32 -static -o DuoSetup.exe
-
 // Including files
 #include <stdlib.h>
 #include <windows.h>
@@ -21,9 +19,6 @@ static int ScanNetworks(void);
 int main(int arg, char *argv[]){
 	int result = -1;
 
-	/* 
-	 * Checks the input arguments 
-	 */
 	printf("Copyright (c) 2016 redbear.cc\n");
 	printf("RedBear Duo Setup CLI version 1.0.0\n");
 
@@ -39,7 +34,7 @@ int main(int arg, char *argv[]){
 			else {
 				printf("\nERROR: The file to be uploaded is not specified yet!\n");
 				PrintHelpMessage();
-				result = -5;
+				result = -1;
 			}
 			break;
 			
@@ -66,7 +61,7 @@ int main(int arg, char *argv[]){
 		default:
 			printf("\nERROR: No option is selected!\n");
 			PrintHelpMessage();
-			result = -6;
+			result = -1;
 			break;
 	}
 	
@@ -104,7 +99,7 @@ static int UploadFirmware(char *file_name, uint8_t reset) {
 
 static int FetchFirmwareVersion(void) {
 	char jsonString[256];
-	char respond[64];
+	char respond[128];
 	
 	AssembleVerCmdString(jsonString);
 	SendJSONCmd(jsonString, respond, sizeof(respond));
@@ -118,7 +113,7 @@ static int FetchFirmwareVersion(void) {
 
 static int FetchDeviceID(void) {
 	char jsonString[256];
-	char respond[64];
+	char respond[128];
 	
 	AssembleDevidCmdString(jsonString);
 	SendJSONCmd(jsonString, respond, sizeof(respond));

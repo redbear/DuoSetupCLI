@@ -1,10 +1,8 @@
-
 // Including files
 #include <winsock2.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 #include "upload.h"
 #include "cmdline_param.h"
 #include "communication.h"
@@ -61,7 +59,7 @@ int PrepareUpload(char *file_name, uint8_t *fileData, uint32_t *fileLength){
 	pFile = fopen(file_name, "rb");      // read only
 	if(NULL == pFile){
 		printf("\nERROR: File \"%s\" doesn't exist or is being occupied!\n", file_name);
-        return -4;
+        return -1;
     }
 	printf("Open file \"%s\"\n", file_name);
 	fseek(pFile,0,SEEK_SET);
@@ -70,18 +68,18 @@ int PrepareUpload(char *file_name, uint8_t *fileData, uint32_t *fileLength){
     fseek(pFile,0,SEEK_SET);   
 	if(*fileLength > MAX_FILE_LENGTH){
 		printf("\nERROR: Selected file is too large!\n");
-		return -5;
+		return -1;
 	}
 	if(1 != fread(fileData, *fileLength, 1, pFile)){
 		printf("\nERROR: Read file failed!\n");
 		fclose(pFile);
-        return -6;
+        return -1;
 	}
 	fclose(pFile);
 	
 	printf("Check file validity:\n");
 	if( CheckFileValidity(fileData) < 0 ){
-		return -7;
+		return -1;
 	}
 	printf("File length : %d\n", *fileLength);
 }
@@ -117,7 +115,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 			printf("\nERROR: Sent chunk data failed!\n");
 			closesocket(sclient);
 			WSACleanup();
-			return -2;
+			return -1;
 		}
 		
 		char recData[255];
@@ -127,7 +125,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 			printf("\nERROR: Receive respond timeout!\n");
 			closesocket(sclient);
 			WSACleanup();
-			return -3;
+			return -1;
 		}
 		
 		recData[ret] = '\0';
@@ -136,7 +134,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 			printf("\nERROR: OTA server not init!\n");
 			closesocket(sclient);
 			WSACleanup();
-			return -4;
+			return -1;
 		}
         else if( !strcmp((const char *)recData, respond[1]) ) // File saved
 		{
@@ -149,7 +147,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 				printf("\nERROR: OTA server finished while file isn't sent completely!\n");
 				closesocket(sclient);
 				WSACleanup();
-				return -6;
+				return -1;
 			}
 		}
 		else if( !strcmp((const char *)recData, respond[0]) ) // Chunk saved
@@ -162,7 +160,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 			printf("\nERROR: respond mismatch! \"%s\"\n", recData);
 			closesocket(sclient);
 			WSACleanup();
-			return -5;
+			return -1;
 		}
 	}
 	
@@ -191,23 +189,23 @@ static int CheckFileValidity(uint8_t *firmware){
 	
 	if(module_info.module_function > 6 || module_info.module_index > 2){
 		printf("ERROR: Module function is invalid!\n");
-		return -2;
+		return -1;
 	}
 	
 	if(module_info.dependency.module_function > 6 || module_info.dependency.module_index > 2){
 		printf("ERROR: Module dependency is invalid!\n");
-		return -2;
+		return -1;
 	}
 	
 	if(module_info.module_start_address < INTERNAL_FLASH_START_ADDR || module_info.module_start_address > INTERNAL_FLASH_END_ADDR || \
 	   module_info.module_end_address < INTERNAL_FLASH_START_ADDR || module_info.module_end_address > INTERNAL_FLASH_END_ADDR){
 		printf("ERROR: Module address is out of range!\n");
-		return -3;
+		return -1;
 	}
 	
 	if((module_info.module_end_address - module_info.module_start_address) <= sizeof(module_info_t)){
 		printf("ERROR: Module length is invalid!\n");
-		return -4;
+		return -1;
 	}
 	
 	return 0;
@@ -238,8 +236,6 @@ static void PrintModuleInfo(module_info_t *module_info){
 static void ProgressBar(const char *desc, unsigned long long curr, unsigned long long max){
 	static char buf[PROGRESS_BAR_WIDTH + 1];
 	static unsigned long long last_progress = -1;
-//	static time_t last_time;
-//	time_t curr_time = time(NULL);
 	unsigned long long progress;
 	unsigned long long x;
 
@@ -254,10 +250,9 @@ static void ProgressBar(const char *desc, unsigned long long curr, unsigned long
 	progress = (PROGRESS_BAR_WIDTH * curr) / max;
 	if (progress > PROGRESS_BAR_WIDTH)
 		progress = PROGRESS_BAR_WIDTH;
-	if (progress == last_progress /*&& curr_time == last_time*/)
+	if (progress == last_progress)
 		return;
 	last_progress = progress;
-//	last_time = curr_time;
 
 	for (x = 0; x != PROGRESS_BAR_WIDTH; x++) {
 		if (x < progress)

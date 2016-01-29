@@ -1,5 +1,5 @@
-#ifndef UPLOAD_H
-#define UPLOAD_H
+#ifndef _UPLOAD_H_
+#define _UPLOAD_H_
 
 #define MAX_FILE_LENGTH               (512*1024)
 

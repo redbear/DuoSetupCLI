@@ -1,4 +1,3 @@
-
 // Including files
 #include <winsock2.h>
 #include <stdio.h>
@@ -19,7 +18,7 @@ int ConnectToClient(SOCKET *sclient, const char *ipAddr, uint16_t port){
 	*sclient = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(*sclient == INVALID_SOCKET){
 		printf("\nERROR: Create socket failed!\n");
-        return -2;
+        return -1;
     }
 	
 	sockaddr_in serAddr;
@@ -31,7 +30,7 @@ int ConnectToClient(SOCKET *sclient, const char *ipAddr, uint16_t port){
         closesocket(*sclient);
 		printf("\n");
 		printf("\nERROR: Connect to server failed!\n");
-        return -3;
+        return -1;
     }
 	if(cmdline_params.verbose) printf("Connected!\n");
 	
