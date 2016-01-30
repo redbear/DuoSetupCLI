@@ -27,7 +27,7 @@ Git clone the repository or download it to your local system. Open command line 
 
 Run `make` to build the `DuoSetupCLI`. The built program is under `./DuoSetupCLI/build`.
 
-Run 'make verbose=1' will build the program and print building details.
+Run `make verbose=1` will build the program and print building details.
 
 Run `make clean` to clean all object files and the built program.
 
