@@ -2,7 +2,7 @@
 
 Command line interface program for setting up Duo
 
-    Usage: DuoSetupCLI <option\> [parameters] 
+    Usage: DuoSetupCLI <option> [parameters] 
 	
 	options:    
 	    --upload       Upload firmware to Duo    
@@ -18,6 +18,11 @@ Command line interface program for setting up Duo
 
 # Build DuoSetupCLI
 
+## Dependencies
+
+make command and GCC tool chain
+
+## Build
 Git clone the repository or download it to your local system. Open command line terminal and change the working directory to `./DuoSetupCLI`. Run `make` to build the `DuoSetupCLI`. The built program is under `./DuoSetupCLI/build`.
 
 Run `make clean` to clean all object files and the built program.

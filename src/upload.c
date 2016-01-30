@@ -1,5 +1,5 @@
 // Including files
-#include <winsock2.h>
+#include "platform.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

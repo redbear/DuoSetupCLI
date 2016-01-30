@@ -1,5 +1,5 @@
 // Including files
-#include <winsock2.h>
+#include "platform.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -13,8 +13,8 @@ static void __itoa_(uint32_t num, char *str);
 void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size){
 	char temp_str[10];
 	char json_param[MAX_JSON_CMD_LENGTH] = {'\0'};
-	uint16_t json_param_len = 0;
-	
+	uint16_t json_param_len = 0;    
+	     
 	strcpy(json_param, "{\"file_length\":");
 	__itoa_(file_len, temp_str);
 	strcat(json_param, temp_str);

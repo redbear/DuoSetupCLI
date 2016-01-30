@@ -1,6 +1,6 @@
 // Including files
+#include "platform.h"
 #include <stdlib.h>
-#include <windows.h>
 #include <stdio.h>
 #include <string.h>
 #include "json_cmd.h"
@@ -20,7 +20,15 @@ int main(int arg, char *argv[]){
 	int result = -1;
 
 	printf("Copyright (c) 2016 redbear.cc\n");
-	printf("RedBear Duo Setup CLI version 1.0.0\n");
+	printf("RedBear Duo Setup CLI version 1.0.0 ");
+	
+#if defined WINDOWS
+	printf("for Windows\n");
+#elif defined LINUX
+	printf("for Linux\n");
+#elif defined MACOSX
+	printf("for Mac OS X\n");
+#endif
 
 	if(ParseCmdlineParameters(arg, argv) < 0)
 		return -1;

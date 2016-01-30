@@ -1,4 +1,5 @@
 // Including files
+#include "platform.h"
 #include <stdio.h>
 #include <string.h>
 #include <windows.h>

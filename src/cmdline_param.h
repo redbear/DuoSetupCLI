@@ -7,15 +7,15 @@ typedef enum {
 	OPTION_FETCH_VERSIONS,
 	OPTION_CHECK_CREDENTIAL,
 	OPTION_FETCH_DEV_ID,
-	OPTION_SCAN_AP,
-}CmdlineOptions_t;
+	OPTION_SCAN_AP,   
+}CmdlineOptions_t;    
 
 typedef struct {
 	uint8_t file_set;
 	char *file_name;
 	uint8_t reset_set;
 	uint8_t verbose;
-}CmdLineParams_t;
+}CmdLineParams_t;        
 
 extern CmdlineOptions_t cmdline_option;
 extern CmdLineParams_t cmdline_params;
