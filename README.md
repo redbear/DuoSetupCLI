@@ -5,32 +5,30 @@ Command line interface program for setting up Duo
     Usage: DuoSetupCLI <option> [parameters] 
 	
     options:
-        --upload       Upload firmware to Duo
-        --version      Fetch the firmware versions
-        --device-id    Fetch the MCU's unique 12-bytes device ID
-        --credential   Check if Duo has stored credentials or not
-        --scan-ap      Scan the nearby Wi-Fi Access Points
+        --upload          Upload firmware to Duo
+        --version         Fetch the firmware versions
+        --device-id       Fetch the MCU's unique 12-bytes device ID
+        --credential      Check if Duo has stored credentials or not
+        --scan-ap         Scan the nearby Wi-Fi Access Points
 
     parameters:
-        --verbose      Print additional message during executing this programm.
-        --file <file>  Used with --upload option. Specify the binary file
-                       (.bin) to be uploaded. The file will be stored from the 
-                       beginning of the OTA region by default, if no "--region" 
-                       is present.
-        --region <n>   Used with --upload option. Specify the region of 
-                       the external flash to store the file. Without this
-                       parameter, the file is stored from the beginning of 
-                       the OTA region. Otherwise, if n=1/2/3, the file 
-                       is stored from the offset of the OTA region, where 
-                       the  offset is n*128KB. if n=4, the file is stored 
-                       at the Factory Reset region
-        --safe         Used with --upload option. Invalid user part so that
-                       Duo enter safe mode after firmware update.
-        --leave        Used with --upload option. Leave listening mode when
-                       uploading firmware completed.
+        --verbose,-v      Print additional message during executing this programm.
+        --file,-f <file>  Used with --upload option. Specify the binary file
+                          (.bin) to be uploaded. The file will be stored from the
+                          beginning of the OTA region by default, if no "--region"
+                          is present.
+        --region,-r <n>   Used with --upload option. Specify the region of
+                          the external flash to store the file. Without this
+                          parameter, the file is stored from the beginning of
+                          the OTA region. Otherwise, if n=1/2/3, the file
+                          is stored from the offset of the OTA region, where
+                          the offset is n*128KB. if n=4, the file is stored
+                          at the Factory Reset region
+        --safe,-s         Used with --upload option. Invalid user part so that
+                          Duo enter safe mode after firmware update.
+        --leave,-l        Used with --upload option. Leave listening mode when
+                          uploading firmware completed.
 
-
-F:\RedBear\Apps\CLI\Duo_setup\build>
 
 # Build DuoSetupCLI
 

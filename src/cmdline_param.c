@@ -22,13 +22,13 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 	
 	for(uint8_t i=1; i<arg; i++)
 	{
-		if(!strcmp(argv[i], "--upload")) {     // --upload
+		if( !strcmp(argv[i], "--upload") ) {     // --upload
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_UPLOAD_FIRMWARE;
 		}
-		else if(!strcmp(argv[i], "--version")) {    // --version
+		else if( !strcmp(argv[i], "--version") ) {    // --version
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_FETCH_VERSIONS;
 		}
-		else if(!strcmp(argv[i], "--device-id")) {    // --device-id
+		else if( !strcmp(argv[i], "--device-id") ) {    // --device-id
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_FETCH_DEV_ID;
 		}
 		else if(!strcmp(argv[i], "--credential")) {    // --credential
@@ -37,10 +37,10 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else if(!strcmp(argv[i], "--scan-ap")) {    // --scan-ap
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_SCAN_AP;
 		}
-		else if(!strcmp(argv[i], "--verbose")) {    // --verbose
+		else if( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
 			cmdline_params.verbose = 1;
 		}
-		else if(!strcmp(argv[i], "--file")) {    // --file
+		else if( (!strcmp(argv[i], "--file")) || (!strcmp(argv[i], "-f")) ) {    // --file
 			i++;
 			if(i < arg) {
 				char form[5] = ".bin";
@@ -68,7 +68,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 				return -1;
 			}
 		}
-		else if(!strcmp(argv[i], "--region")) {    // --region
+		else if( (!strcmp(argv[i], "--region")) || (!strcmp(argv[i], "-r")) ) {    // --region
 			i++;
 			if(i < arg) {
 				if(argv[i][0]>='1' && argv[i][0]<='4') {
@@ -85,10 +85,10 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 				return -1;
 			}
 		}
-		else if(!strcmp(argv[i], "--safe")) {    // --safe
+		else if( (!strcmp(argv[i], "--safe")) || (!strcmp(argv[i], "-s")) ) {    // --safe
 			cmdline_params.safe = 1;
 		}
-		else if(!strcmp(argv[i], "--leave")) {    // --leave
+		else if( (!strcmp(argv[i], "--leave")) || (!strcmp(argv[i], "-l")) ) {    // --leave
 			cmdline_params.leave = 1;
 		}
 		else {
@@ -105,29 +105,29 @@ void PrintHelpMessage(void){
 	printf("\nUsage   : %s <option> [parameters]\n\n", "DuoSetupCLI");
 	
 	printf("options: \n");
-	printf("    --upload       Upload firmware to Duo\n");
-	printf("    --version      Fetch the firmware versions\n");
-	printf("    --device-id    Fetch the MCU's unique 12-bytes device ID\n");
-	printf("    --credential   Check if Duo has stored credentials or not\n");
-	printf("    --scan-ap      Scan the nearby Wi-Fi Access Points\n\n");
+	printf("    --upload          Upload firmware to Duo\n");
+	printf("    --version         Fetch the firmware versions\n");
+	printf("    --device-id       Fetch the MCU's unique 12-bytes device ID\n");
+	printf("    --credential      Check if Duo has stored credentials or not\n");
+	printf("    --scan-ap         Scan the nearby Wi-Fi Access Points\n\n");
 	
 	printf("parameters: \n");
-	printf("    --verbose      Print additional message during executing this programm.\n");
-	printf("    --file <file>  Used with --upload option. Specify the binary file\n");
-	printf("                   (.bin) to be uploaded. The file will be stored from the\n");
-	printf("                   beginning of the OTA region by default, if no \"--region\"\n");
-	printf("                   is present.\n");
-	printf("    --region <n>   Used with --upload option. Specify the region of \n");
-	printf("                   the external flash to store the file. Without this\n");
-	printf("                   parameter, the file is stored from the beginning of\n");
-	printf("                   the OTA region. Otherwise, if n=1/2/3, the file\n");
-	printf("                   is stored from the offset of the OTA region, where\n"); 
-	printf("                   the offset is n*128KB. if n=4, the file is stored\n");
-	printf("                   at the Factory Reset region\n");
-	printf("    --safe         Used with --upload option. Invalid user part so that\n");
-	printf("                   Duo enter safe mode after firmware update.\n");
-	printf("    --leave        Used with --upload option. Leave listening mode when\n");
-	printf("                   uploading firmware completed.\n\n");
+	printf("    --verbose,-v      Print additional message during executing this programm.\n");
+	printf("    --file,-f <file>  Used with --upload option. Specify the binary file\n");
+	printf("                      (.bin) to be uploaded. The file will be stored from the\n");
+	printf("                      beginning of the OTA region by default, if no \"--region\"\n");
+	printf("                      is present.\n");
+	printf("    --region,-r <n>   Used with --upload option. Specify the region of \n");
+	printf("                      the external flash to store the file. Without this\n");
+	printf("                      parameter, the file is stored from the beginning of\n");
+	printf("                      the OTA region. Otherwise, if n=1/2/3, the file\n");
+	printf("                      is stored from the offset of the OTA region, where\n"); 
+	printf("                      the offset is n*128KB. if n=4, the file is stored\n");
+	printf("                      at the Factory Reset region\n");
+	printf("    --safe,-s         Used with --upload option. Invalid user part so that\n");
+	printf("                      Duo enter safe mode after firmware update.\n");
+	printf("    --leave,-l        Used with --upload option. Leave listening mode when\n");
+	printf("                      uploading firmware completed.\n\n");
 }
 
 
