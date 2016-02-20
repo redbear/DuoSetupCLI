@@ -9,7 +9,7 @@
 
 
 // Functions declaration
-static int UploadFirmware(char *file_name, uint8_t reset);
+static int UploadFirmware(char *file_name, uint8_t area, uint8_t leave, uint8_t safe);
 static int FetchFirmwareVersion(void);
 static int FetchDeviceID(void);
 static int CheckCredential(void);
@@ -37,7 +37,7 @@ int main(int arg, char *argv[]){
 		case OPTION_UPLOAD_FIRMWARE:
 			if(cmdline_params.file_set) {
 				printf("Upload firmware to Duo.\n");
-				result = UploadFirmware(cmdline_params.file_name, cmdline_params.reset_set);	
+				result = UploadFirmware(cmdline_params.file_name, cmdline_params.region, cmdline_params.leave, cmdline_params.safe);	
 			}
 			else {
 				printf("\nERROR: The file to be uploaded is not specified yet!\n");
@@ -76,18 +76,28 @@ int main(int arg, char *argv[]){
 	return result;
 }
 
-static int UploadFirmware(char *file_name, uint8_t reset) {
+static int UploadFirmware(char *file_name, uint8_t region, uint8_t leave, uint8_t safe) {
 	char jsonString[256];
 	char respond[64];
-	uint8_t chunk_addr = 0;
-	uint8_t chunk_size = 128;
+	uint32_t chunk_addr = OTA_REGION_ADDR;
+	uint16_t chunk_size = 128;
 	uint8_t fileData[MAX_FILE_LENGTH];
 	uint32_t fileLength = 0;
 	
 	if(PrepareUpload(file_name, fileData, &fileLength) < 0)
 		return -1;
 	
-	AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size);
+	if(region == OTA_REGION_1) chunk_addr = OTA_REGION_SEC1_ADDR;
+	else if(region == OTA_REGION_2) chunk_addr = OTA_REGION_SEC2_ADDR;
+	else if(region == OTA_REGION_3) chunk_addr = OTA_REGION_SEC3_ADDR;
+	else if(region == FAC_REGION) chunk_addr = FAC_REGION_ADDR;
+	
+	if(region < 4)
+		printf("File will be stored from offset 0x%02x of the OTA region.\n", chunk_addr);
+	else
+		printf("File will be stored from 0x%02x of the Factory Reset region.\n", chunk_addr);
+	
+	AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, region);
 	uint8_t i;
 	for(i=0; i<3; i++) {
 		if(i > 0) printf("\nRetrying...\n");
@@ -96,8 +106,15 @@ static int UploadFirmware(char *file_name, uint8_t reset) {
 		if( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) continue;
 		break;
 	}
-	if(reset && i<3) {
-		printf("\nReset to restart...\n");
+	
+	if(safe && i<3) {
+		printf("\nInvalid user part...\n");
+		AssembleInvalidCmdString(jsonString);
+		SendJSONCmd(jsonString, respond, sizeof(respond));
+	}
+	
+	if(leave && i<3) {
+		printf("\nLeave listening mode...\n");
 		AssembleRstCmdString(jsonString);
 		SendJSONCmd(jsonString, respond, sizeof(respond));
 	}

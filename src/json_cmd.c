@@ -10,10 +10,11 @@
 
 static void __itoa_(uint32_t num, char *str);
 
-void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size){
+void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size, uint8_t region){
 	char temp_str[10];
 	char json_param[MAX_JSON_CMD_LENGTH] = {'\0'};
 	uint16_t json_param_len = 0;    
+	uint8_t file_store;
 	     
 	strcpy(json_param, "{\"file_length\":");
 	__itoa_(file_len, temp_str);
@@ -25,6 +26,14 @@ void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, u
 	
 	strcat(json_param, ",\"chunk_size\":");
 	__itoa_(chunk_size, temp_str);
+	strcat(json_param, temp_str);
+	
+	if(region == FAC_REGION)
+		file_store = 1;		// SYSTEM
+	else
+		file_store = 0;		// FIRMWARE
+	strcat(json_param, ",\"file_store\":");
+	__itoa_(file_store, temp_str);
 	strcat(json_param, temp_str);
 	
 	strcat(json_param, "}");
@@ -106,6 +115,21 @@ void AssembleScanApCmdString(char *js)
 
 	memset(js, '\0', MAX_JSON_CMD_LENGTH);
 	strcpy(js, "scan-ap\n");
+	
+	json_param_len = 0;
+	__itoa_(json_param_len, temp_str);
+	strcat(js, temp_str);
+	
+	strcat(js, "\n\n");
+}
+
+void AssembleInvalidCmdString(char *js)
+{
+	char temp_str[10];
+	uint16_t json_param_len = 0;
+
+	memset(js, '\0', MAX_JSON_CMD_LENGTH);
+	strcpy(js, "invalid-user\n");
 	
 	json_param_len = 0;
 	__itoa_(json_param_len, temp_str);

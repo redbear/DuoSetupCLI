@@ -141,7 +141,7 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 			sentBytes += chunkLen;
 			ProgressBar("Upload", sentBytes, fileLen);
 			if(sentBytes == fileLen)
-				printf("Selected file is successfully uploaded.\n");
+				printf("Selected file is uploaded successfully.\n");
 			else
 			{
 				printf("\nERROR: OTA server finished while file isn't sent completely!\n");
@@ -173,8 +173,12 @@ int OTAUploadFirmware(uint8_t *firmware, uint32_t fileLen, uint16_t chunkSize){
 static int CheckFileValidity(uint8_t *firmware){
 	module_info_t module_info;
 	uint32_t startAddress = 0;
+	uint32_t app_mask = 0;
+	
 	memset(&module_info, 0x00, sizeof(module_info_t));
-	if( (*firmware & APP_START_MASK) == 0x20000000 ){
+	
+	app_mask = (uint32_t)( firmware[0] | (firmware[1]<<8) | (firmware[2]<<16) | (firmware[3]<<24) );
+	if( (app_mask & APP_START_MASK) == 0x20000000 ){
 		startAddress += 0x184; // Skip the vector table
 	}
 

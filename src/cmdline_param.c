@@ -68,8 +68,28 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 				return -1;
 			}
 		}
-		else if(!strcmp(argv[i], "--reset")) {    // --reset
-			cmdline_params.reset_set = 1;
+		else if(!strcmp(argv[i], "--region")) {    // --region
+			i++;
+			if(i < arg) {
+				if(argv[i][0]>='1' && argv[i][0]<='4') {
+					cmdline_params.region = argv[i][0] - 48;
+				}
+				else {
+					printf("\nERROR: The parameter specified by \"--region\" should be 1,2,3 or 4!\n\n");
+					return -1;
+				}
+			}
+			else {
+				printf("\nERROR: The region is not specified by parameter \"--region\"!\n\n");
+				PrintHelpMessage();
+				return -1;
+			}
+		}
+		else if(!strcmp(argv[i], "--safe")) {    // --safe
+			cmdline_params.safe = 1;
+		}
+		else if(!strcmp(argv[i], "--leave")) {    // --leave
+			cmdline_params.leave = 1;
 		}
 		else {
 			printf("\nERROR: Unknown option or parameter \"%s\" .\n", argv[i]);
@@ -89,12 +109,25 @@ void PrintHelpMessage(void){
 	printf("    --version      Fetch the firmware versions\n");
 	printf("    --device-id    Fetch the MCU's unique 12-bytes device ID\n");
 	printf("    --credential   Check if Duo has stored credentials or not\n");
-	printf("    --scan-ap      Scan the nearby Wi-Fi Access Points for Duo to connect\n\n");
+	printf("    --scan-ap      Scan the nearby Wi-Fi Access Points\n\n");
 	
 	printf("parameters: \n");
-	printf("    --verbose      Print additional message during executing programm.\n");
-	printf("    --file <file>  Used with --upload option. Specify the binary file (.bin) to be uploaded.\n");
-	printf("    --reset        Used with --upload option. Make Duo perform reset when uploading firmware complete.\n\n");
+	printf("    --verbose      Print additional message during executing this programm.\n");
+	printf("    --file <file>  Used with --upload option. Specify the binary file\n");
+	printf("                   (.bin) to be uploaded. The file will be stored from the\n");
+	printf("                   beginning of the OTA region by default, if no \"--region\"\n");
+	printf("                   is present.\n");
+	printf("    --region <n>   Used with --upload option. Specify the region of \n");
+	printf("                   the external flash to store the file. Without this\n");
+	printf("                   parameter, the file is stored from the beginning of\n");
+	printf("                   the OTA region. Otherwise, if n=1/2/3, the file\n");
+	printf("                   is stored from the offset of the OTA region, where\n"); 
+	printf("                   the offset is n*128KB. if n=4, the file is stored\n");
+	printf("                   at the Factory Reset region\n");
+	printf("    --safe         Used with --upload option. Invalid user part so that\n");
+	printf("                   Duo enter safe mode after firmware update.\n");
+	printf("    --leave        Used with --upload option. Leave listening mode when\n");
+	printf("                   uploading firmware completed.\n\n");
 }
 
 
