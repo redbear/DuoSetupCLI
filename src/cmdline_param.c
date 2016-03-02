@@ -71,11 +71,11 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else if( (!strcmp(argv[i], "--region")) || (!strcmp(argv[i], "-r")) ) {    // --region
 			i++;
 			if(i < arg) {
-				if(argv[i][0]>='1' && argv[i][0]<='4') {
+				if(argv[i][0]>='1' && argv[i][0]<='8') {
 					cmdline_params.region = argv[i][0] - 48;
 				}
 				else {
-					printf("\nERROR: The parameter specified by \"--region\" should be 1,2,3 or 4!\n\n");
+					printf("\nERROR: The parameter specified by \"--region\" should be 1 ~ 7 or 8!\n\n");
 					return -1;
 				}
 			}
@@ -120,9 +120,9 @@ void PrintHelpMessage(void){
 	printf("    --region,-r <n>   Used with --upload option. Specify the region of \n");
 	printf("                      the external flash to store the file. Without this\n");
 	printf("                      parameter, the file is stored from the beginning of\n");
-	printf("                      the OTA region. Otherwise, if n=1/2/3, the file\n");
+	printf("                      the OTA region. Otherwise, if n=[1...7], the file\n");
 	printf("                      is stored from the offset of the OTA region, where\n"); 
-	printf("                      the offset is n*128KB. if n=4, the file is stored\n");
+	printf("                      the offset is n*128KB. if n=8, the file is stored\n");
 	printf("                      at the Factory Reset region\n");
 	printf("    --safe,-s         Used with --upload option. Invalid user part so that\n");
 	printf("                      Duo enter safe mode after firmware update.\n");

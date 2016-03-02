@@ -79,25 +79,30 @@ int main(int arg, char *argv[]){
 static int UploadFirmware(char *file_name, uint8_t region, uint8_t leave, uint8_t safe) {
 	char jsonString[256];
 	char respond[64];
-	uint32_t chunk_addr = OTA_REGION_ADDR;
+	uint32_t chunk_addr = 0x0;
 	uint16_t chunk_size = 128;
+	uint8_t file_store;
 	uint8_t fileData[MAX_FILE_LENGTH];
 	uint32_t fileLength = 0;
+	uint32_t bounds[9]={0x0, 0x10000, 0x20000, 0x30000, 0x40000, 0x50000, 0x60000, 0x70000,  // The offset of the OTA region
+						0x140000  // The address of the Factory Reset region
+						};
 	
 	if(PrepareUpload(file_name, fileData, &fileLength) < 0)
 		return -1;
 	
-	if(region == OTA_REGION_1) chunk_addr = OTA_REGION_SEC1_ADDR;
-	else if(region == OTA_REGION_2) chunk_addr = OTA_REGION_SEC2_ADDR;
-	else if(region == OTA_REGION_3) chunk_addr = OTA_REGION_SEC3_ADDR;
-	else if(region == FAC_REGION) chunk_addr = FAC_REGION_ADDR;
+	chunk_addr = bounds[region];
 	
-	if(region < 4)
+	if(region < 8) {
 		printf("File will be stored from offset 0x%02x of the OTA region.\n", chunk_addr);
-	else
+		file_store = 0;		// FIRMWARE
+	}
+	else {
 		printf("File will be stored from 0x%02x of the Factory Reset region.\n", chunk_addr);
+		file_store = 1;		// SYSTEM
+	}
 	
-	AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, region);
+	AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, file_store);
 	uint8_t i;
 	for(i=0; i<3; i++) {
 		if(i > 0) printf("\nRetrying...\n");
