@@ -10,7 +10,7 @@
 
 static void __itoa_(uint32_t num, char *str);
 
-void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size, uint8_t file_store){
+void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, uint16_t chunk_size, uint8_t file_store) {
 	char temp_str[10];
 	char json_param[MAX_JSON_CMD_LENGTH] = {'\0'};
 	uint16_t json_param_len = 0;    
@@ -44,7 +44,7 @@ void AssembleOtaCmdString(char *js, uint32_t file_len, uint32_t chunk_address, u
 	strcat(js, json_param);
 }
 
-void AssembleRstCmdString(char *js){
+void AssembleRstCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -58,8 +58,7 @@ void AssembleRstCmdString(char *js){
 	strcat(js, "\n\n");
 }
 
-void AssembleVerCmdString(char *js)
-{
+void AssembleVerCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -73,8 +72,7 @@ void AssembleVerCmdString(char *js)
 	strcat(js, "\n\n");
 }
 
-void AssembleDevidCmdString(char *js)
-{
+void AssembleDevidCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -88,8 +86,7 @@ void AssembleDevidCmdString(char *js)
 	strcat(js, "\n\n");
 }
 
-void AssembleChkCredentCmdString(char *js)
-{
+void AssembleChkCredentCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -103,8 +100,7 @@ void AssembleChkCredentCmdString(char *js)
 	strcat(js, "\n\n");
 }
 
-void AssembleScanApCmdString(char *js)
-{
+void AssembleScanApCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -118,8 +114,45 @@ void AssembleScanApCmdString(char *js)
 	strcat(js, "\n\n");
 }
 
-void AssembleInvalidCmdString(char *js)
-{
+void AssembleConfigApCmdString(char *js, char *ssid, int32_t security, char *password) {
+	char temp_str[10];
+	char json_param[MAX_JSON_CMD_LENGTH] = {'\0'};
+	uint16_t json_param_len = 0;    
+	     
+	strcpy(json_param, "{\"idx\":");
+	__itoa_(0, temp_str);
+	strcat(json_param, temp_str);
+	
+	strcat(json_param, ",\"ssid\":\"");
+	strcat(json_param, ssid);
+	strcat(json_param, "\"");
+	
+	strcat(json_param, ",\"pwd\":\"");
+	strcat(json_param, password);
+	strcat(json_param, "\"");
+	
+	strcat(json_param, ",\"ch\":");
+	__itoa_(0, temp_str);
+	strcat(json_param, temp_str);
+	
+	strcat(json_param, ",\"sec\":");
+	__itoa_(security, temp_str);
+	strcat(json_param, temp_str);
+	
+	strcat(json_param, "}");
+	
+	memset(js, '\0', MAX_JSON_CMD_LENGTH);
+	strcpy(js, "configure-ap\n");
+	
+	json_param_len = strlen(json_param);
+	__itoa_(json_param_len, temp_str);
+	strcat(js, temp_str);
+	
+	strcat(js, "\n\n");
+	strcat(js, json_param);
+}
+
+void AssembleInvalidCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
 
@@ -133,7 +166,7 @@ void AssembleInvalidCmdString(char *js)
 	strcat(js, "\n\n");
 }
 
-int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len){
+int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len) {
 	int timeout = 5000; // In milliseconds
 	
 	SOCKET sclient;
@@ -173,7 +206,7 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len){
     return 0;
 }
 
-static void __itoa_(uint32_t num, char *str){
+static void __itoa_(uint32_t num, char *str) {
     char index[] = "0123456789";
     int i = 0, j;
 

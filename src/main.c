@@ -62,9 +62,11 @@ static int UploadFirmware(char *file_name, uint8_t area, uint8_t leave, uint8_t 
 static int FetchFirmwareVersion(void);
 static int FetchDeviceID(void);
 static int CheckCredential(void);
-static int ScanNetworks(Scan_result_t *scan_result);
+static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt);
+static int ConfigAP(void);
 
 Scan_result_t scan_result[MAX_SCAN_RECORD];
+uint8_t scan_result_cnt = 0;
 
 // Functions achievement
 int main(int arg, char *argv[]){
@@ -117,7 +119,12 @@ int main(int arg, char *argv[]){
 			for(uint8_t i=0; i<MAX_SCAN_RECORD; i++) {
 				memset(&scan_result[i], 0x00, sizeof(Scan_result_t));
 			}
-			result = ScanNetworks(scan_result);
+			result = ScanNetworks(scan_result, &scan_result_cnt);
+			break;
+			
+		case OPTION_CONFIG_AP:
+			printf("Config Access Points.\n");
+			result = ConfigAP();
 			break;
 			
 		default:
@@ -205,7 +212,7 @@ static int FetchFirmwareVersion(void) {
 		}
 	}
 	
-	return 0;
+	return result;
 }
 
 static int FetchDeviceID(void) {
@@ -232,7 +239,7 @@ static int FetchDeviceID(void) {
 		}
 	}
 	
-	return 0;
+	return result;
 }
 
 static int CheckCredential(void) {
@@ -258,14 +265,13 @@ static int CheckCredential(void) {
 		}
 	}
 	
-	return 0;
+	return result;
 }
 
-static int ScanNetworks(Scan_result_t *scan_result) {
+static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
 	char jsonString[256];
 	char respond[10240];
 	cJSON *json, *array, *object;
-	uint8_t scan_cnt;
 	int result = -1;
 	
 	AssembleScanApCmdString(jsonString);
@@ -276,17 +282,24 @@ static int ScanNetworks(Scan_result_t *scan_result) {
 		if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
 		else {
 			array = cJSON_GetObjectItem(json, "scans");
-			scan_cnt = cJSON_GetArraySize( array );
+			*scan_result_cnt = cJSON_GetArraySize( array );
 
-			printf( "\n    SSID       RSSI     Security     Channel     MDR\n");
+			printf( "\n    SSID                RSSI       Security         Channel     MDR\n");
 			
-			for(uint8_t i=0; i<scan_cnt; i++) {
+			for(uint8_t i=0; i<*scan_result_cnt; i++) {
 				object = cJSON_GetArrayItem(array, i);
 				
 				char *ssid = cJSON_GetObjectItem(object, "ssid")->valuestring;
 				memcpy(scan_result[i].ssid, ssid, strlen(ssid));
 				scan_result[i].ssid[strlen(ssid)] = '\0';
-				printf("%02d. %s     ", i+1, ssid);
+				printf("%02d. ", i+1);
+				uint8_t ssid_len = strlen(scan_result[i].ssid);
+				for(uint8_t j=0; j<20; j++) {
+					if(j<ssid_len)
+						printf("%c", scan_result[i].ssid[j]);
+					else
+						printf(" ");
+				}
 				
 				scan_result[i].rssi = cJSON_GetObjectItem(object, "rssi")->valueint;
 				printf("%ddBm     ", scan_result[i].rssi);
@@ -315,7 +328,7 @@ static int ScanNetworks(Scan_result_t *scan_result) {
 				}
 				
 				scan_result[i].ch = cJSON_GetObjectItem(object, "ch")->valueint;
-				printf("%d     ", scan_result[i].ch);
+				printf("%d            ", scan_result[i].ch);
 				
 				scan_result[i].mdr = cJSON_GetObjectItem(object, "mdr")->valueint/1000;
 				printf("%dKB/s\n", scan_result[i].mdr);
@@ -325,6 +338,88 @@ static int ScanNetworks(Scan_result_t *scan_result) {
 		}
 	}
 	
-	return 0;
+	return result;
+}
+
+static int ConfigAP(void) {
+	char jsonString[256];
+	char respond[10240];
+	cJSON *json;
+	int result = -1;
+	
+	for(uint8_t i=0; i<MAX_SCAN_RECORD; i++) {
+		memset(&scan_result[i], 0x00, sizeof(Scan_result_t));
+	}
+	char scan_again = 'n';
+	do {
+		printf("Scanning networks ...\n");
+		result = ScanNetworks(scan_result, &scan_result_cnt);
+		if(result == 0) {
+			printf("\nScan again?(y/n):");
+			scan_again = getchar();
+			while(getchar() != '\n'); // Clear the stdin
+		}
+	}while(scan_again == 'y' && result == 0);
+	
+	if(result == 0) {
+		uint8_t idx = 0;
+		char ssid[21];
+		int32_t security = WICED_SECURITY_OPEN;
+		uint8_t cipher;
+		char password[21];
+		
+		printf("\nPlease input the index of AP in the above scanned result lists, \n");
+		printf("or input '0' to manually config the AP that not in the list: ");
+
+		scanf("%d", &idx);
+		
+		if(idx > 0 && idx <= scan_result_cnt) {
+			memcpy(ssid, scan_result[idx].ssid, sizeof(ssid));
+			security = scan_result[idx].sec;
+		}
+		else {
+			printf("\nThe AP you chose is not in the list, please config AP manually.\n");
+			printf("SSID: ");
+			scanf("%s", ssid);
+			printf("Security 0=unsecured, 1=WEP, 2=WPA, 3=WPA2: ");
+			scanf("%d", &security);
+			if(security == 0) 
+				security = WICED_SECURITY_OPEN;
+			else if(security == 1) {
+				security = WICED_SECURITY_WEP_PSK;
+			}
+			else if(security == 2 || security == 3) {
+				if(security == 2) 
+					security = WPA_SECURITY;
+				else 
+					security = WPA2_SECURITY;
+				printf("Security Cipher 1=AES, 2=TKIP, 3=AES+TKIP: ");
+				scanf("%d", &cipher);
+				if(cipher == 1) 
+					security |= AES_ENABLED;
+				else if(cipher == 2) 
+					security |= TKIP_ENABLED;
+				else 
+					security |= AES_ENABLED|TKIP_ENABLED;
+			}
+		}
+		printf("Password: ");
+		scanf("%s", password);
+		
+		AssembleConfigApCmdString(jsonString, ssid, security, password);
+		result = SendJSONCmd(jsonString, respond, sizeof(respond));
+		
+		if(result == 0) {
+			json=cJSON_Parse((const char *)respond);
+			if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+			else {
+				printf("\n");
+				printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
+				cJSON_Delete(json);
+			}
+		}
+	}
+	
+	return result;
 }
 

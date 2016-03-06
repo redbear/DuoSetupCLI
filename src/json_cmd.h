@@ -7,6 +7,7 @@ void AssembleVerCmdString(char *js);
 void AssembleDevidCmdString(char *js);
 void AssembleChkCredentCmdString(char *js); 
 void AssembleScanApCmdString(char *js);
+void AssembleConfigApCmdString(char *js, char *ssid, int32_t security, char *password);
 void AssembleInvalidCmdString(char *js);
 int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len);
 

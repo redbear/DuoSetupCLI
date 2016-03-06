@@ -37,6 +37,9 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else if(!strcmp(argv[i], "--scan-ap")) {    // --scan-ap
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_SCAN_AP;
 		}
+		else if(!strcmp(argv[i], "--config-ap")) {    // --config-ap
+			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CONFIG_AP;
+		}
 		else if( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
 			cmdline_params.verbose = 1;
 		}
@@ -109,7 +112,8 @@ void PrintHelpMessage(void){
 	printf("    --version         Fetch the firmware versions\n");
 	printf("    --device-id       Fetch the MCU's unique 12-bytes device ID\n");
 	printf("    --credential      Check if Duo has stored credentials or not\n");
-	printf("    --scan-ap         Scan the nearby Wi-Fi Access Points\n\n");
+	printf("    --scan-ap         Scan the nearby Wi-Fi Access Points\n");
+	printf("    --config-ap       Config an AP for Duo to connect\n\n");
 	
 	printf("parameters: \n");
 	printf("    --verbose,-v      Print additional message during executing this programm.\n");

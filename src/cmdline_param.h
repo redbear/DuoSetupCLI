@@ -8,6 +8,7 @@ typedef enum {
 	OPTION_CHECK_CREDENTIAL,
 	OPTION_FETCH_DEV_ID,
 	OPTION_SCAN_AP,   
+	OPTION_CONFIG_AP,
 }CmdlineOptions_t;    
 
 typedef struct {
