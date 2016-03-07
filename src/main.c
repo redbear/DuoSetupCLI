@@ -9,6 +9,8 @@
 #include "cJSON.h"
 
 #define MAX_SCAN_RECORD	   20
+#define MAX_SSID_LENGTH    33
+#define MAX_SEC_KEY_LENGTH 64
 
 #define SHARED_ENABLED     0x00008000
 #define WPA_SECURITY       0x00200000
@@ -50,7 +52,7 @@ typedef enum
 } wiced_security_t;
 
 typedef struct {
-	char ssid[21];
+	char ssid[MAX_SSID_LENGTH];
 	int rssi;
 	int32_t sec;
 	uint8_t ch;
@@ -284,7 +286,8 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
 			array = cJSON_GetObjectItem(json, "scans");
 			*scan_result_cnt = cJSON_GetArraySize( array );
 
-			printf( "\n    SSID                RSSI       Security         Channel     MDR\n");
+			printf( "\n    SSID                             RSSI    Security       Channel  MDR");
+			printf( "\n    ----                             ----    --------       -------  ---\n");
 			
 			for(uint8_t i=0; i<*scan_result_cnt; i++) {
 				object = cJSON_GetArrayItem(array, i);
@@ -294,7 +297,7 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
 				scan_result[i].ssid[strlen(ssid)] = '\0';
 				printf("%02d. ", i+1);
 				uint8_t ssid_len = strlen(scan_result[i].ssid);
-				for(uint8_t j=0; j<20; j++) {
+				for(uint8_t j=0; j<MAX_SSID_LENGTH; j++) {
 					if(j<ssid_len)
 						printf("%c", scan_result[i].ssid[j]);
 					else
@@ -302,33 +305,46 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
 				}
 				
 				scan_result[i].rssi = cJSON_GetObjectItem(object, "rssi")->valueint;
-				printf("%ddBm     ", scan_result[i].rssi);
+				printf("%ddBm", scan_result[i].rssi);
+				if(scan_result[i].rssi > -10) printf("   ");
+				else if(scan_result[i].rssi > -100) printf("  ");
+				else printf(" ");
 				
+				char sec_str[18];
 				scan_result[i].sec = cJSON_GetObjectItem(object, "sec")->valueint;
 				switch(scan_result[i].sec) {
-					case WICED_SECURITY_OPEN: printf("OPEN     "); break;
-					case WICED_SECURITY_WEP_PSK: printf("WEP_PSK     "); break;
-					case WICED_SECURITY_WEP_SHARED: printf("WEP_SHARED     "); break;
-					case WICED_SECURITY_WPA_TKIP_PSK: printf("WPA_TKIP_PSK     "); break;
-					case WICED_SECURITY_WPA_AES_PSK: printf("WPA_AES_PSK     "); break;
-					case WICED_SECURITY_WPA_MIXED_PSK: printf("WPA_MIXED_PSK     "); break;
-					case WICED_SECURITY_WPA2_AES_PSK: printf("WPA2_AES_PSK     "); break;
-					case WICED_SECURITY_WPA2_TKIP_PSK: printf("WPA2_TKIP_PSK     "); break;
-					case WICED_SECURITY_WPA2_MIXED_PSK: printf("WPA2_MIXED_PSK     "); break;
-					case WICED_SECURITY_WPA_TKIP_ENT: printf("WPA_TKIP_ENT     "); break;
-					case WICED_SECURITY_WPA_AES_ENT: printf("WPA_AES_ENT     "); break;
-					case WICED_SECURITY_WPA_MIXED_ENT: printf("WPA_MIXED_ENT     "); break;
-					case WICED_SECURITY_WPA2_TKIP_ENT: printf("WPA2_TKIP_ENT     "); break;
-					case WICED_SECURITY_WPA2_AES_ENT: printf("WPA2_AES_ENT     "); break;
-					case WICED_SECURITY_WPA2_MIXED_ENT: printf("WPA2_MIXED_ENT     "); break;
-					case WICED_SECURITY_IBSS_OPEN: printf("IBSS_OPEN     "); break;
-					case WICED_SECURITY_WPS_OPEN: printf("WPS_OPEN     "); break;
-					case WICED_SECURITY_WPS_SECURE: printf("WPS_SECURE     "); break;
-					default: printf("UNKNOWN     "); break;
+					case WICED_SECURITY_OPEN:           strcpy(sec_str, "OPEN"); break;
+					case WICED_SECURITY_WEP_PSK:        strcpy(sec_str, "WEP_PSK"); break;
+					case WICED_SECURITY_WEP_SHARED:     strcpy(sec_str, "WEP_SHARED"); break;
+					case WICED_SECURITY_WPA_TKIP_PSK:   strcpy(sec_str, "WPA_TKIP_PSK"); break;
+					case WICED_SECURITY_WPA_AES_PSK:    strcpy(sec_str, "WPA_AES_PSK"); break;
+					case WICED_SECURITY_WPA_MIXED_PSK:  strcpy(sec_str, "WPA_MIXED_PSK"); break;
+					case WICED_SECURITY_WPA2_AES_PSK:   strcpy(sec_str, "WPA2_AES_PSK"); break;
+					case WICED_SECURITY_WPA2_TKIP_PSK:  strcpy(sec_str, "WPA2_TKIP_PSK"); break;
+					case WICED_SECURITY_WPA2_MIXED_PSK: strcpy(sec_str, "WPA2_MIXED_PSK"); break;
+					case WICED_SECURITY_WPA_TKIP_ENT:   strcpy(sec_str, "WPA_TKIP_ENT"); break;
+					case WICED_SECURITY_WPA_AES_ENT:    strcpy(sec_str, "WPA_AES_ENT"); break;
+					case WICED_SECURITY_WPA_MIXED_ENT:  strcpy(sec_str, "WPA_MIXED_ENT"); break;
+					case WICED_SECURITY_WPA2_TKIP_ENT:  strcpy(sec_str, "WPA2_TKIP_ENT"); break;
+					case WICED_SECURITY_WPA2_AES_ENT:   strcpy(sec_str, "WPA2_AES_ENT"); break;
+					case WICED_SECURITY_WPA2_MIXED_ENT: strcpy(sec_str, "WPA2_MIXED_ENT"); break;
+					case WICED_SECURITY_IBSS_OPEN:      strcpy(sec_str, "IBSS_OPEN"); break;
+					case WICED_SECURITY_WPS_OPEN:       strcpy(sec_str, "WPS_OPEN"); break;
+					case WICED_SECURITY_WPS_SECURE:     strcpy(sec_str, "WPS_SECURE"); break;
+					default:                            strcpy(sec_str, "UNKNOWN"); break;
+				}
+				for(uint8_t j=0; j<18; j++) {
+					if(j < strlen(sec_str))
+						printf("%c", sec_str[j]);
+					else
+						printf(" ");
 				}
 				
 				scan_result[i].ch = cJSON_GetObjectItem(object, "ch")->valueint;
-				printf("%d            ", scan_result[i].ch);
+				printf("%d", scan_result[i].ch);
+				if(scan_result[i].ch < 10) printf("     ");
+				else if(scan_result[i].ch < 100) printf("    ");
+				else printf("   ");
 				
 				scan_result[i].mdr = cJSON_GetObjectItem(object, "mdr")->valueint/1000;
 				printf("%dKB/s\n", scan_result[i].mdr);
@@ -363,10 +379,10 @@ static int ConfigAP(void) {
 	
 	if(result == 0) {
 		uint8_t idx = 0;
-		char ssid[21];
+		char ssid[MAX_SSID_LENGTH];
 		int32_t security = WICED_SECURITY_OPEN;
 		uint8_t cipher;
-		char password[21];
+		char password[MAX_SEC_KEY_LENGTH];
 		
 		printf("\nPlease input the index of AP in the above scanned result lists, \n");
 		printf("or input '0' to manually config the AP that not in the list: ");
