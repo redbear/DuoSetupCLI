@@ -394,6 +394,7 @@ static int ConfigAP(void) {
 		printf("or input '0' to manually config the AP that not in the list: ");
 
 		scanf("%d", &idx);
+		while(getchar() != '\n'); // Clear the stdin
 		
 		if(idx > 0 && idx <= scan_result_cnt) {
 			memcpy(ssid, scan_result[idx].ssid, sizeof(ssid));
@@ -402,8 +403,17 @@ static int ConfigAP(void) {
 		else {
 			printf("\nThe AP you chose is not in the list, please config AP manually.\n");
 			printf("SSID: ");
-			scanf("%s", ssid);
-			printf("ssid: %s", ssid);
+			char c, num = 0;
+			do {
+				c = getchar();
+				if(c != '\n') {
+					ssid[num] = c;
+					num++;
+				}
+			}
+			while(c != '\n');
+			ssid[num] = '\0';
+			
 			printf("Security 0=unsecured, 1=WEP, 2=WPA, 3=WPA2: ");
 			scanf("%d", &security);
 			if(security == 0) 
