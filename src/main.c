@@ -67,6 +67,7 @@ static int CheckCredential(void);
 static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt);
 static int ConfigAP(void);
 static int ConnectAP(void);
+static int FetchDevicePublicKey(void);
 
 Scan_result_t scan_result[MAX_SCAN_RECORD];
 uint8_t scan_result_cnt = 0;
@@ -133,6 +134,11 @@ int main(int arg, char *argv[]){
 		case OPTION_CONNECT_AP:
 			printf("Connect to Access Points.\n");
 			result = ConnectAP();
+			break;
+			
+		case OPTION_PUBLIC_KEY:
+			printf("Fetch device public key.\n");
+			result = FetchDevicePublicKey();
 			break;
 			
 		default:
@@ -471,6 +477,31 @@ static int ConnectAP(void) {
 		else {
 			printf("\n");
 			printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
+			cJSON_Delete(json);
+		}
+	}
+	
+	return result;
+}
+
+static int FetchDevicePublicKey(void) {
+	char jsonString[256];
+	char respond[1024];
+	cJSON *json;
+	int result = -1;
+	
+	AssemblePublicKeyCmdString(jsonString);
+	result = SendJSONCmd(jsonString, respond, sizeof(respond));
+	
+	if(result == 0) {
+		json=cJSON_Parse((const char *)respond);
+		if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+		else {
+			printf("\n");
+			if(cJSON_GetObjectItem(json, "r")->valueint != 1) 
+				printf("    Device public key : %s\n", cJSON_GetObjectItem(json, "b")->valuestring);
+			else 
+				printf("Fetch device public key failed!\n");
 			cJSON_Delete(json);
 		}
 	}

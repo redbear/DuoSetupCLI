@@ -10,6 +10,7 @@ typedef enum {
 	OPTION_SCAN_AP,   
 	OPTION_CONFIG_AP,
 	OPTION_CONNECT_AP,
+	OPTION_PUBLIC_KEY,
 }CmdlineOptions_t;    
 
 typedef struct {

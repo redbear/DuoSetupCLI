@@ -43,6 +43,9 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else if(!strcmp(argv[i], "--connect-ap")) {    // --connect-ap
 			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CONNECT_AP;
 		}
+		else if(!strcmp(argv[i], "--public-key")) {    // --public-key
+			if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_PUBLIC_KEY;
+		}
 		else if( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
 			cmdline_params.verbose = 1;
 		}
@@ -118,7 +121,8 @@ void PrintHelpMessage(void){
 	printf("    --scan-ap         Scan the nearby Wi-Fi Access Points\n");
 	printf("    --config-ap       Config an AP for Duo to connect\n");
 	printf("    --connect-ap      Leave listening mode and try connecting the stored AP\n");
-	printf("                      It will enter listening mode again if no valid AP stored\n\n");
+	printf("                      It will enter listening mode again if no valid AP stored\n");
+	printf("    --public-key      Fetch the device public key that stored in Duo\n\n");
 	
 	printf("parameters: \n");
 	printf("    --verbose,-v      Print additional message during executing this programm.\n");

@@ -166,6 +166,20 @@ void AssembleConnectApCmdString(char *js) {
 	strcat(js, "\n\n");
 }
 
+void AssemblePublicKeyCmdString(char *js) {
+	char temp_str[10];
+	uint16_t json_param_len = 0;
+
+	memset(js, '\0', MAX_JSON_CMD_LENGTH);
+	strcpy(js, "public-key\n");
+	
+	json_param_len = 0;
+	__itoa_(json_param_len, temp_str);
+	strcat(js, temp_str);
+	
+	strcat(js, "\n\n");
+}
+
 void AssembleInvalidCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
