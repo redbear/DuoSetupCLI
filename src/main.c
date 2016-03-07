@@ -66,6 +66,7 @@ static int FetchDeviceID(void);
 static int CheckCredential(void);
 static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt);
 static int ConfigAP(void);
+static int ConnectAP(void);
 
 Scan_result_t scan_result[MAX_SCAN_RECORD];
 uint8_t scan_result_cnt = 0;
@@ -127,6 +128,11 @@ int main(int arg, char *argv[]){
 		case OPTION_CONFIG_AP:
 			printf("Config Access Points.\n");
 			result = ConfigAP();
+			break;
+			
+		case OPTION_CONNECT_AP:
+			printf("Connect to Access Points.\n");
+			result = ConnectAP();
 			break;
 			
 		default:
@@ -397,6 +403,7 @@ static int ConfigAP(void) {
 			printf("\nThe AP you chose is not in the list, please config AP manually.\n");
 			printf("SSID: ");
 			scanf("%s", ssid);
+			printf("ssid: %s", ssid);
 			printf("Security 0=unsecured, 1=WEP, 2=WPA, 3=WPA2: ");
 			scanf("%d", &security);
 			if(security == 0) 
@@ -433,6 +440,28 @@ static int ConfigAP(void) {
 				printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
 				cJSON_Delete(json);
 			}
+		}
+	}
+	
+	return result;
+}
+
+static int ConnectAP(void) {
+	char jsonString[256];
+	char respond[128];
+	cJSON *json;
+	int result = -1;
+	
+	AssembleConnectApCmdString(jsonString);
+	result = SendJSONCmd(jsonString, respond, sizeof(respond));
+	
+	if(result == 0) {
+		json=cJSON_Parse((const char *)respond);
+		if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+		else {
+			printf("\n");
+			printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
+			cJSON_Delete(json);
 		}
 	}
 	

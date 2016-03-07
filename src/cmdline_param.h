@@ -9,6 +9,7 @@ typedef enum {
 	OPTION_FETCH_DEV_ID,
 	OPTION_SCAN_AP,   
 	OPTION_CONFIG_AP,
+	OPTION_CONNECT_AP,
 }CmdlineOptions_t;    
 
 typedef struct {

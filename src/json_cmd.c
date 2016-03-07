@@ -152,6 +152,20 @@ void AssembleConfigApCmdString(char *js, char *ssid, int32_t security, char *pas
 	strcat(js, json_param);
 }
 
+void AssembleConnectApCmdString(char *js) {
+	char temp_str[10];
+	uint16_t json_param_len = 0;
+
+	memset(js, '\0', MAX_JSON_CMD_LENGTH);
+	strcpy(js, "connect-ap\n");
+	
+	json_param_len = 0;
+	__itoa_(json_param_len, temp_str);
+	strcat(js, temp_str);
+	
+	strcat(js, "\n\n");
+}
+
 void AssembleInvalidCmdString(char *js) {
 	char temp_str[10];
 	uint16_t json_param_len = 0;
