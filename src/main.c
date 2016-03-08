@@ -442,8 +442,10 @@ static int ConfigAP(void) {
 					security |= AES_ENABLED|TKIP_ENABLED;
 			}
 		}
-		printf("Password: ");
-		scanf("%s", password);
+		if(security != WICED_SECURITY_OPEN) {
+			printf("Password: ");
+			scanf("%s", password);
+		}
 		
 		AssembleConfigApCmdString(jsonString, ssid, security, password);
 		result = SendJSONCmd(jsonString, respond, sizeof(respond));
