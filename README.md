@@ -4,37 +4,41 @@ Command line interface program for setting up Duo
 
     Usage: DuoSetupCLI <option> [parameters] 
 	
-    options:
+    <options>:
         --upload          Upload firmware to Duo
         --version         Fetch the firmware versions
         --device-id       Fetch the MCU's unique 12-bytes device ID
         --credential      Check if Duo has stored credentials or not
         --scan-ap         Scan the nearby Wi-Fi Access Points
+        --config-ap       Config an AP for Duo to connect (**TBD**)
+        --connect-ap      Leave listening mode and try connecting the stored AP
+                          It will enter listening mode again if no valid AP stored
+        --public-key      Fetch the device public key that stored in Duo
 
-    parameters:
-        --verbose,-v      Print additional message during executing this programm.
+    [parameters]:
+        --verbose,-v      Print additional message during executing this programm
         --file,-f <file>  Used with --upload option. Specify the binary file
                           (.bin) to be uploaded. The file will be stored from the
                           beginning of the OTA region by default, if no "--region"
-                          is present.
+                          is present
         --region,-r <n>   Used with --upload option. Specify the region of
                           the external flash to store the file. Without this
                           parameter, the file is stored from the beginning of
-                          the OTA region. Otherwise, if n=1/2/3, the file
+                          the OTA region. Otherwise, if n=[1...7], the file
                           is stored from the offset of the OTA region, where
-                          the offset is n*128KB. if n=4, the file is stored
+                          the offset is n*64KB. if n=8, the file is stored
                           at the Factory Reset region
         --safe,-s         Used with --upload option. Invalid user part so that
-                          Duo enter safe mode after firmware update.
+                          Duo enter safe mode after firmware update
         --leave,-l        Used with --upload option. Leave listening mode when
-                          uploading firmware completed.
+                          uploading firmware completed
 
 
 # Build DuoSetupCLI
 
 ## Dependencies
 
-make command and GCC tool chain
+Build tools and GCC Tools chain
 
 ## Build
 Git clone the repository or download it to your local system. Open command line terminal and change the working directory to `./DuoSetupCLI`.
