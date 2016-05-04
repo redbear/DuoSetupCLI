@@ -135,7 +135,7 @@ void PrintHelpMessage(void){
 	printf("                      parameter, the file is stored from the beginning of\n");
 	printf("                      the OTA region. Otherwise, if n=[1...7], the file\n");
 	printf("                      is stored from the offset of the OTA region, where\n"); 
-	printf("                      the offset is n*128KB. if n=8, the file is stored\n");
+	printf("                      the offset is n*64KB. if n=8, the file is stored\n");
 	printf("                      at the Factory Reset region\n");
 	printf("    --safe,-s         Used with --upload option. Invalid user part so that\n");
 	printf("                      Duo enter safe mode after firmware update.\n");
