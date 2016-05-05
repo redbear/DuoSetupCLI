@@ -12,10 +12,11 @@
     #include <netinet/in.h>
     #include <netdb.h>
     #include <arpa/inet.h>
+    #include <unistd.h>
 
     #define SOCKET            int
     #define SOCKET_ERROR      (-1)
-	#define INVALID_SOCKET    (-1)
+    #define INVALID_SOCKET    (-1)
     #define closesocket       close
     #define WSACleanup()  
 

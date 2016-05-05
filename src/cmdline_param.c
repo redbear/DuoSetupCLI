@@ -2,7 +2,9 @@
 #include "platform.h"
 #include <stdio.h>
 #include <string.h>
+#if defined WINDOWS
 #include <windows.h>
+#endif
 #include <stdlib.h>
 #include "cmdline_param.h"
 
