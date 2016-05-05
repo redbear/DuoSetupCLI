@@ -44,6 +44,8 @@ Then what if I want to upload the system part1, system part 2 and user part with
 
 Sometimes the new released firmware version is not compatible with the old application running on your Duo. In this case, you had better use the "--safe" parameter in the command so that after leaving the listening mode the Duo will deploy the firmware first and then run into Safe Mode.
 
+Command:
+
 * OTA update system part1 of the firmware and then leave listening mode to deploy the new firmware:    
 
         DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -l
@@ -80,32 +82,111 @@ Sometimes the new released firmware version is not compatible with the old appli
 
     etc. The order of executing these commands does not matter, as long as they do not override each other and finally leave the listening mode. It is little complex to operate the multi-firmware uploading. It should be fixed later -- How about `DuoSetupCLI --upload -f image1.bin -f image2.bin -f image3.bin -l` ?
 
+Report(e.g.):
+
+    Upload firmware to Duo.
+    Open file "Blink.bin"
+    Check file validity:
+
+        Platform ID             : 88
+        Module function         : MOD_FUNC_USER_PART
+        Module index            : 1
+        Module dependency       : MOD_FUNC_SYSTEM_PART
+        Module dependency index : 2
+        Module start address    : 0x80c0000
+        Module and address      : 0x80c0c44
+
+    File length : 3144
+    File will be stored from offset 0x00 0f the OTA region.
+    Upload  [==========================] 100%  3144 bytes
+    Upload done.
+    Selected file is uploaded successfully.
+
+    Leave listening mode...
+
 ### Fetch Firmware Version
+
+Command:  
 
     DuoSetupCLI --version
 
+Report(e.g.):
+
+    Fetch firmware versions.
+
+        Release      : 0.2.3
+        Bootloader   : 3
+        System part1 : 6
+        System part2 : 6
+        User part    : 6
+
 ### Fetch Device ID
+
+Command:   
 
     DuoSetupCLI --device-id
 
+Report(e.g.):   
+
+    Fetch device ID.
+
+        Device ID : 24004xxxxC47353033323637
+        Claimed   : NO
+
+
 ### Check Credentials
+
+Command: 
 
     DuoSetupCLI --credentials
 
+Report(e.g.):
+
+    Check credential.
+
+        Has credentials : YES
+
 ### Scan AP
 
+Command: 
+
     DuoSetupCLI --scan-ap
+
+Report(e.g.):
+
+    Scan Access Points.
+
+        SSID             RSSI    Security      Channel  MDR
+        ----             ----    --------      -------  ---
+    01. Dong mac         -53dBm  WPA2_AES_PSK     11    216KB/s
+    02. AP-02_2.4G       -59dBm  WPA2_AES_PSK     5     300KB/s
+    03. RedBear          -41dBm  WPA2_MIXED_PSK   6     130KB/s
 
 ### Config AP (*TBD*)
 
 ### Connect AP
 
+Command:
+
     DuoSetupCLI --connect-ap
+
+Report:
+
+    Connect to Access Point.
+
+        Result : 0
 
 ### Fetch Device Public Key
 
+Command:
+
     DuoSetupCLI --public-key
 
+Report(e.g.):
+
+    Fetch device public key.
+
+        Device public key : 308123546754567......
     
 # Build DuoSetupCLI
 ---
@@ -124,6 +205,7 @@ Run `make verbose=1` will build the program and print building details.
 Run `make clean` to clean all object files and the built program.
 
 # License
+---
 
 Copyright (c) 2016 Red Bear
 
