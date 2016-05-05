@@ -38,6 +38,10 @@ ifeq ("$(MAKE_OS)","WINDOWS")
 LIBS += -lws2_32
 endif
 
+ifeq ("$(MAKE_OS)","MACOSX")
+LDFLAGS := $(filter-out -static,$(LDFLAGS))
+endif
+
 # Verbose
 ifneq ("1","$(verbose)")
 silent = @
