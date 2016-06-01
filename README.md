@@ -1,7 +1,13 @@
-# Usage
+# DuoSetupCLI
 ---
 
-DuoSetupCLI is a command line interface program for setting up Duo. Power on your Duo and make it enter the listening mode. The Duo will act as an AP, e.g. "Duo-xxxx" and you can see it in the AP scanned list on your computer. Connect your computer to the AP which your Duo is brodcasting.
+DuoSetupCLI Version: **v0.1.0**  
+Cooperate with Duo Firmware Version: **v0.2.3 or above**
+
+## Usage
+---
+
+DuoSetupCLI is a command line interface program for setting up Duo. **Power on your Duo and make it enter the listening mode**. The Duo will act as an AP, e.g. "Duo-xxxx" and you can see it in the AP scanned list on your computer. Connect your computer to the AP which your Duo is brodcasting.
 
     Usage: DuoSetupCLI <option> [parameters] 
 	
@@ -36,51 +42,18 @@ DuoSetupCLI is a command line interface program for setting up Duo. Power on you
 
 ### OTA(Over The Air) Update Firmware
 
-The binary image you are going to upload is stored at the begining of the OTA region of the external flash by default, i.e. "--region 0", if no "--region" presented. Thus, every time you upload a binary image, you have to run the command with "--leave" parameter to make Duo leave listening mode and perform a soft reset to deploy the firmware.    
+The binary image you are going to upload is stored at the begining of the OTA region of the external flash by default, i.e. "--region 0" if no "--region" presented. The OTA region, of which size is 512KB, is separated into 8 sub-regions, of which size is 64KB. Every time you upload a binary image, you should run the command with "--leave" parameter to make Duo leave listening mode and perform a soft reset to deploy the firmware.    
 
 If you are going to upload a factory reset (FAC) image to Duo, you have to run the command with setting the "--region" to **8** to specify that this image is going to be stored in FAC region, not the OTA region. Since the FAC image is stored in external flash directly, you don't need to leave the listening mode to deploy the FAC firmware.    
-
-Then what if I want to upload the system part1, system part 2 and user part within the same connection, and then leave the listening mode to deploy all of them one time? Using the "--region" parameter in the command is important! If you keep uploading new image without leaving listening mode and speicfying the "--region", the image you just uploaded before will be overrode. The OTA region, of which size is 512KB, is separated into 8 sub-regions, of which size is 64KB. You need to know how many sub-regions are occupied by the images you uploaded before, then you can upload a new image from a free sub-region. E.g., if you have uploaded an image, of which size is 65KB(64KB+1KB), from the begining of the OTA region, then the sub-region 0 and 1 are not availabe any more before leaving listening mode. If you're going to upload a new image by the next, you must set the "--region" to 2 to not override the images stored before.
 
 Sometimes the new released firmware version is not compatible with the old application running on your Duo. In this case, you had better use the "--safe" parameter in the command so that after leaving the listening mode the Duo will deploy the firmware first and then run into Safe Mode.
 
 Command:
 
-* OTA update system part1 of the firmware and then leave listening mode to deploy the new firmware:    
-
         DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -l
-
-* OTA update system part2 of the firmware and then leave listening mode to deploy the new firmware:
-
         DuoSetupCLI --upload -f duo-system-part2-v0.2.3.bin -l
-
-* OTA update user part application and then leave the listening mode to run the new application:
-
-        DuoSetupCLI --upload -f duo-user-part2-v0.2.3.bin -l
-
-* OTA update the Factory Reset Firmware. We must set the "--region" parameter to **8** to specify the location where the FAC firmware to be stored. The Factory Reset Firmware is under deploying during uploading progress, so it doesn't need to leave listening mode to deploy it again:
-
+        DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin -l
         DuoSetupCLI --upload -f duo-fac-tinker-v0.2.3.bin -r 8
-
-* OTA upldate system part1(assume it 38KB), system part 2(assume it 281KB) and user part(assume it 7KB) and then leave the listening mode to deploy all of them one time:
-
-        DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin 
-        DuoSetupCLI --upload -f duo-system-part2-v0.2.3.bin -r 1
-        DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin -r 6 -l
-
-    or
-
-        DuoSetupCLI --upload -f duo-system-part2-v0.2.3.bin 
-        DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -r 5
-        DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin -r 6 -l
-
-    or
-
-        DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin 
-        DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -r 1
-        DuoSetupCLI --upload -f duo-system-part2-v0.2.3.bin -r 2 -l
-
-    etc. The order of executing these commands does not matter, as long as they do not override each other and finally leave the listening mode. It is little complex to operate the multi-firmware uploading. It should be fixed later -- How about `DuoSetupCLI --upload -f image1.bin -f image2.bin -f image3.bin -l` ?
 
 Report(e.g.):
 
@@ -162,8 +135,6 @@ Report(e.g.):
     02. AP-02_2.4G       -59dBm  WPA2_AES_PSK     5     300KB/s
     03. RedBear          -41dBm  WPA2_MIXED_PSK   6     130KB/s
 
-### Config AP (*TBD*)
-
 ### Connect AP
 
 Command:
@@ -188,14 +159,14 @@ Report(e.g.):
 
         Device public key : 308123546754567......
     
-# Build DuoSetupCLI
+## Build DuoSetupCLI
 ---
 
-## Dependencies
+### Dependencies
 
 Build tools and GCC Tools chain
 
-## Build
+### Build
 Git clone the repository or download it to your local system. Open command line terminal and change the working directory to `./DuoSetupCLI`.
 
 Run `make` to build the `DuoSetupCLI`. The built program is under `./DuoSetupCLI/build`.
@@ -204,7 +175,7 @@ Run `make verbose=1` will build the program and print building details.
 
 Run `make clean` to clean all object files and the built program.
 
-# License
+## License
 ---
 
 Copyright (c) 2016 Red Bear
