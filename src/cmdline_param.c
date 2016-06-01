@@ -51,7 +51,40 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 		else if( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
 			cmdline_params.verbose = 1;
 		}
-		else if( (!strcmp(argv[i], "--file")) || (!strcmp(argv[i], "-f")) ) {    // --file
+        else if( (!strcmp(argv[i], "--file")) || (!strcmp(argv[i], "-f")) ) {    // --file
+			i++;
+			if(i < arg) {
+                if(cmdline_params.file_num >= MAX_OTA_FILE_NUM) {
+                    printf("\nERROR: Too many file to be uploaded while the OTA region\n");
+                    printf("       is only capable of storing %d images simultaneously!\n\n", cmdline_params.file_num);
+                    return -1;
+                }
+				char form[5] = ".bin";
+				char format[5] = "    ";
+				int fLen = strlen(argv[i]);
+				if(fLen < 5){
+					printf("\nERROR: The selcted file \"%s\" is invalid!\n\n", argv[i]);
+					return -1;  
+				}
+				format[3] = argv[i][fLen-1];
+				format[2] = argv[i][fLen-2];
+				format[1] = argv[i][fLen-3];
+				format[0] = argv[i][fLen-4];
+				if(0 != strcmp(form, format)){
+					printf("\nERROR: Selected file \"%s\" format must be .bin!\n\n", argv[i]);
+					return -1;
+				}
+				
+				cmdline_params.file_name[cmdline_params.file_num] = argv[i];
+                cmdline_params.file_num++;
+			}
+			else {
+				printf("\nERROR: File is not specified by parameter \"--file\"!\n\n");
+				PrintHelpMessage();
+				return -1;
+			}
+		}
+        else if( (!strcmp(argv[i], "--factory")) || (!strcmp(argv[i], "-fac")) ) {    // --factory
 			i++;
 			if(i < arg) {
 				char form[5] = ".bin";
@@ -70,28 +103,11 @@ int ParseCmdlineParameters(int arg, char *argv[]){
 					return -1;
 				}
 				
-				cmdline_params.file_set = 1;
-				cmdline_params.file_name = argv[i];
+				cmdline_params.fac_set = 1;
+				cmdline_params.fac_name = argv[i];
 			}
 			else {
 				printf("\nERROR: File is not specified by parameter \"--file\"!\n\n");
-				PrintHelpMessage();
-				return -1;
-			}
-		}
-		else if( (!strcmp(argv[i], "--region")) || (!strcmp(argv[i], "-r")) ) {    // --region
-			i++;
-			if(i < arg) {
-				if(argv[i][0]>='1' && argv[i][0]<='8') {
-					cmdline_params.region = argv[i][0] - 48;
-				}
-				else {
-					printf("\nERROR: The parameter specified by \"--region\" should be 1 ~ 7 or 8!\n\n");
-					return -1;
-				}
-			}
-			else {
-				printf("\nERROR: The region is not specified by parameter \"--region\"!\n\n");
 				PrintHelpMessage();
 				return -1;
 			}

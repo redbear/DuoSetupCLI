@@ -19,9 +19,9 @@
 #define WPS_ENABLED        0x10000000
 #define IBSS_ENABLED       0x20000000
 
-#define WEP_ENABLED                 0x0001
-#define TKIP_ENABLED                0x0002
-#define AES_ENABLED                 0x0004
+#define WEP_ENABLED        0x0001
+#define TKIP_ENABLED       0x0002
+#define AES_ENABLED        0x0004
 
 typedef enum
 {
@@ -59,8 +59,17 @@ typedef struct {
 	uint32_t mdr;
 }Scan_result_t;
 
+Scan_result_t scan_result[MAX_SCAN_RECORD];
+uint8_t scan_result_cnt = 0;
+
+uint8_t file_idx = 0;
+uint32_t curr_addr = 0;
+uint32_t file_len = 0;
+uint32_t region_addr[OTA_REGION_UNIT_CNT] = { 0x0, 0x10000, 0x20000, 0x30000, 0x40000, 0x50000, 0x60000, 0x70000};  // The offset of the OTA region
+uint8_t region_idx = 0;
+
 // Functions declaration
-static int UploadFirmware(char *file_name, uint8_t area, uint8_t leave, uint8_t safe);
+static uint32_t UploadFirmware(char *file_name, uint32_t chunk_addr, uint8_t file_store);
 static int FetchFirmwareVersion(void);
 static int FetchDeviceID(void);
 static int CheckCredential(void);
@@ -68,13 +77,12 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt);
 static int ConfigAP(void);
 static int ConnectAP(void);
 static int FetchDevicePublicKey(void);
-
-Scan_result_t scan_result[MAX_SCAN_RECORD];
-uint8_t scan_result_cnt = 0;
+static int InvalidUserPart(void);
+static int LeaveListeningMode(void);
 
 // Functions achievement
 int main(int arg, char *argv[]){
-	int result = -1;
+	int16_t result = -1;
 
 	printf("Copyright (c) 2016 redbear.cc\n");
 	printf("RedBear Duo Setup CLI version 1.0.0 ");
@@ -87,15 +95,53 @@ int main(int arg, char *argv[]){
 	printf("for Mac OS X\n");
 #endif
 
+    cmdline_params.file_num = 0;
+
 	if(ParseCmdlineParameters(arg, argv) < 0)
 		return -1;
 	
 	switch(cmdline_option) {
 		case OPTION_UPLOAD_FIRMWARE:
-			if(cmdline_params.file_set) {
-				printf("Upload firmware to Duo.\n");
-				result = UploadFirmware(cmdline_params.file_name, cmdline_params.region, cmdline_params.leave, cmdline_params.safe);	
-			}
+            if(cmdline_params.file_num != 0) {
+                printf("Upload firmware to Duo.\n");
+                
+                // Upload firmware
+                while(file_idx < cmdline_params.file_num) { 
+                    if(region_idx >= OTA_REGION_UNIT_CNT) {
+                        printf("\nERROR: No OTA region available!\n");
+                        break;
+                    }
+                    curr_addr = region_addr[region_idx];
+                    printf("\nUpload image %s to 0x%x of the OTA region.\n", cmdline_params.file_name[file_idx], curr_addr);
+                    file_len = UploadFirmware(cmdline_params.file_name[file_idx], curr_addr, 0); // 0: FIRMWARE
+                    if(file_len != 0) {
+                        curr_addr += file_len;
+                        
+                        if(curr_addr % OTA_REGION_UNIT_SIZE == 0) region_idx = curr_addr / OTA_REGION_UNIT_SIZE;
+                        else region_idx = (curr_addr / OTA_REGION_UNIT_SIZE) + 1;
+                    }
+                    else printf("\nERROR: Upload file failed!\n");
+                    file_idx++;
+                }
+                
+                // Upload factory reset firmware
+                if(cmdline_params.fac_set) {
+                    printf("Upload factory reset image %s to the FAC region.\n", cmdline_params.fac_name);
+                    file_len = UploadFirmware(cmdline_params.fac_name, FAC_REGION_ADDR, 1); // 1: SYSTEM
+                    if(file_len == 0) {
+                        printf("\nERROR: Upload file failed!\n");
+                    }
+                }
+                
+                if(cmdline_params.safe) {
+                    printf("\nInvalid user part...\n");
+                    InvalidUserPart();
+                }
+                if(cmdline_params.leave) {
+                    printf("\nLeave listening mode...\n");
+                    LeaveListeningMode();
+                }
+            }
 			else {
 				printf("\nERROR: The file to be uploaded is not specified yet!\n");
 				PrintHelpMessage();
@@ -151,31 +197,22 @@ int main(int arg, char *argv[]){
 	return result;
 }
 
-static int UploadFirmware(char *file_name, uint8_t region, uint8_t leave, uint8_t safe) {
+static uint32_t UploadFirmware(char *file_name, uint32_t chunk_addr, uint8_t file_store) {
 	char jsonString[256];
 	char respond[64];
-	uint32_t chunk_addr = 0x0;
 	uint16_t chunk_size = 128;
-	uint8_t file_store;
 	uint8_t fileData[MAX_FILE_LENGTH];
 	uint32_t fileLength = 0;
-	uint32_t bounds[9]={0x0, 0x10000, 0x20000, 0x30000, 0x40000, 0x50000, 0x60000, 0x70000,  // The offset of the OTA region
-						0x140000  // The address of the Factory Reset region
-						};
 	
 	if(PrepareUpload(file_name, fileData, &fileLength) < 0)
-		return -1;
-	
-	chunk_addr = bounds[region];
-	
-	if(region < 8) {
-		printf("File will be stored from offset 0x%02x of the OTA region.\n", chunk_addr);
-		file_store = 0;		// FIRMWARE
-	}
-	else {
-		printf("File will be stored from 0x%02x of the Factory Reset region.\n", chunk_addr);
-		file_store = 1;		// SYSTEM
-	}
+		return 0;
+    
+    if(file_store == 0) {
+        if((chunk_addr + fileLength) > MAX_OTA_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of OTA region!\n");
+    }
+    else {
+        if((chunk_addr + fileLength) > MAX_FAC_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of FAC region!\n");
+    }
 	
 	AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, file_store);
 	uint8_t i;
@@ -186,20 +223,32 @@ static int UploadFirmware(char *file_name, uint8_t region, uint8_t leave, uint8_
 		if( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) continue;
 		break;
 	}
+    
+    if(i == 3) return 0;
+    
+	return fileLength;
+}
+
+static int InvalidUserPart(void) {
+	char jsonString[256];
+	char respond[128];
+	int result = -1;
 	
-	if(safe && i<3) {
-		printf("\nInvalid user part...\n");
-		AssembleInvalidCmdString(jsonString);
-		SendJSONCmd(jsonString, respond, sizeof(respond));
-	}
+	AssembleInvalidCmdString(jsonString);
+    result = SendJSONCmd(jsonString, respond, sizeof(respond));
 	
-	if(leave && i<3) {
-		printf("\nLeave listening mode...\n");
-		AssembleRstCmdString(jsonString);
-		SendJSONCmd(jsonString, respond, sizeof(respond));
-	}
+	return result;
+}
+
+static int LeaveListeningMode(void) {
+	char jsonString[256];
+	char respond[128];
+	int result = -1;
 	
-	return 0;
+	AssembleRstCmdString(jsonString);
+    result = SendJSONCmd(jsonString, respond, sizeof(respond));
+	
+	return result;
 }
 
 static int FetchFirmwareVersion(void) {

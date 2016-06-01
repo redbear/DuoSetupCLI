@@ -1,6 +1,8 @@
 #ifndef _CMDLINE_PARAM_H_
 #define _CMDLINE_PARAM_H_
 
+#define MAX_OTA_FILE_NUM    3 // Be capable of storing 3 images simultaneously in OTA region
+
 typedef enum {
 	OPTION_NOT_SPECIFIED,
 	OPTION_UPLOAD_FIRMWARE,
@@ -14,9 +16,10 @@ typedef enum {
 }CmdlineOptions_t;    
 
 typedef struct {
-	uint8_t file_set;
-	char *file_name;
-	uint8_t region;
+    uint8_t file_num;
+    char *file_name[MAX_OTA_FILE_NUM]; 
+    uint8_t fac_set;
+    char *fac_name;
 	uint8_t safe;
 	uint8_t leave;
 	uint8_t verbose;
