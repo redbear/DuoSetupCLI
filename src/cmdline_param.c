@@ -150,7 +150,8 @@ void PrintHelpMessage(void) {
     printf("\nUsage   : %s <option> [parameters]\n\n", "DuoSetupCLI");
     
     printf("options: \n");
-    printf("    --upload          Upload firmware to Duo\n");
+    printf("    --upload          Upload firmware to Duo. At least one of the --file and -fac\n");
+    printf("                      parameters must be presented. It's OK if both are presented.\n");
     printf("    --version         Fetch the firmware versions\n");
     printf("    --device-id       Fetch the MCU's unique 12-bytes device ID\n");
     printf("    --credential      Check if Duo has stored credentials or not\n");
@@ -163,8 +164,10 @@ void PrintHelpMessage(void) {
     printf("parameters: \n");
     printf("    --verbose,-v      Print additional message during executing this programm.\n");
     printf("    --file,-f <file>  Used with --upload option. Specify the binary file\n");
-    printf("                      (.bin) to be uploaded. The file will be stored from the\n");
-    printf("                      beginning of the OTA region.\n");
+    printf("                      (.bin) to be uploaded. The first file specified by --file,\n");
+    printf("                      will be stored from the beginning of the OTA region. If\n");
+    printf("                      several --file are presented, the rest files will be stored\n");
+    printf("                      in the OTA region successively\n");
     printf("    -fac <file>       Used with --upload option. Specify the binary file\n");
     printf("                      (.bin) to be uploaded. The file will be stored from the\n");
     printf("                      beginning of the FAC region\n");

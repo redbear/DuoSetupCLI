@@ -164,7 +164,7 @@ int main(int arg, char *argv[]) {
                 }
             }
             else {
-                printf("\nERROR: The file to be uploaded is not specified yet!\n");
+                printf("\nERROR: Neither --file nor -fac is presented when using --upload option!\n");
                 PrintHelpMessage();
                 result = -1;
             }
