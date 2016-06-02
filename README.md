@@ -1,8 +1,8 @@
 # DuoSetupCLI
 ---
 
-DuoSetupCLI Version: **v0.1.0**  
-Cooperate with Duo Firmware Version: **v0.2.3 or above**
+DuoSetupCLI Version: **v0.2.0**  
+Cooperate with Duo Firmware Version: **v0.2.5 or above**
 
 ## Usage
 ---
@@ -12,7 +12,8 @@ DuoSetupCLI is a command line interface program for setting up Duo. **Power on y
     Usage: DuoSetupCLI <option> [parameters] 
 	
     <options>:
-        --upload          Upload firmware to Duo
+        --upload          Upload firmware to Duo. At least one of the --file and -fac
+                          parameters must be presented. It's OK if both are presented.
         --version         Fetch the firmware versions
         --device-id       Fetch the MCU's unique 12-bytes device ID
         --credential      Check if Duo has stored credentials or not
@@ -25,148 +26,155 @@ DuoSetupCLI is a command line interface program for setting up Duo. **Power on y
     [parameters]:
         --verbose,-v      Print additional message during executing this programm
         --file,-f <file>  Must be used with --upload option. Specify the binary file
+                          (.bin) to be uploaded. The first file specified by --file,
+                          will be stored from the beginning of the OTA region. If
+                          several --file are presented, the rest files will be stored
+                          in the OTA region successively.
+        -fac <file>       Used with --upload option. Specify the binary file
                           (.bin) to be uploaded. The file will be stored from the
-                          beginning of the OTA region by default, if no "--region"
-                          is present
-        --region,-r <n>   Used with --upload option. Specify the region of
-                          the external flash to store the file. Without this
-                          parameter, the file is stored from the beginning of
-                          the OTA region. Otherwise, if n=[1...7], the file
-                          is stored from the offset of the OTA region, where
-                          the offset is n*64KB. if n=8, the file is stored
-                          at the Factory Reset region
+                          beginning of the FAC region.
         --safe,-s         Used with --upload option. Invalid user part so that
                           Duo enter safe mode after firmware update
         --leave,-l        Used with --upload option. Leave listening mode when
                           uploading firmware completed
 
-### OTA(Over The Air) Update Firmware
+#### OTA(Over The Air) Update Firmware
 
-The binary image you are going to upload is stored at the begining of the OTA region of the external flash by default, i.e. "--region 0" if no "--region" presented. The OTA region, of which size is 512KB, is separated into 8 sub-regions, of which size is 64KB. Every time you upload a binary image, you should run the command with "--leave" parameter to make Duo leave listening mode and perform a soft reset to deploy the firmware.    
+The binary image you are going to upload is stored at the begining of the OTA region of the external flash. Every time after you run the DuosetupCLI to upload firmware images, you must NOT run the command to perform upload action again if you don't have your Duo reset once to deploy the uploded firmware, or the forward uploaded files will be over written. Accompany with the `--leave` parameter when uploading files will automatically make your Duo leave listening mode and perform soft reset after files being uploaded. E.g.:
 
-If you are going to upload a factory reset (FAC) image to Duo, you have to run the command with setting the "--region" to **8** to specify that this image is going to be stored in FAC region, not the OTA region. Since the FAC image is stored in external flash directly, you don't need to leave the listening mode to deploy the FAC firmware.    
+    DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -l
 
-Sometimes the new released firmware version is not compatible with the old application running on your Duo. In this case, you had better use the "--safe" parameter in the command so that after leaving the listening mode the Duo will deploy the firmware first and then run into Safe Mode.
+DuoSetupCLI supports updating multiple files simultaneously (limited to 3 files for now) by specifying each file with `-f` parameter, as long as the total size of these files is not large than the OTA region size. E.g.:
 
-Command:
+    DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -f duo-system-part2-v0.2.3.bin -f duo-user-part-v0.2.3.bin -l
 
-        DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -l
-        DuoSetupCLI --upload -f duo-system-part2-v0.2.3.bin -l
+If you are going to upload a factory reset (FAC) image to Duo, you should specify the file with `-fac` parameter so that it will be stored in FAC region, independent from the OTA region. Since the FAC image is stored in external flash directly, you don't have to leave the listening mode to deploy the FAC firmware. E.g.:
+
+    DuoSetupCLI --upload -fac duo-fac-web-server-v0.2.3.bin    
+
+The `-f` and `-fac` parameters can be presented in the same command, since the files specified by each are stored in defferent memory space. E.g.:
+
+    DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin -fac duo-fac-web-server-v0.2.3.bin
+
+Sometimes the new released firmware version is not compatible with the old application running on your Duo. In this case, you had better use the "--safe" parameter in the command so that after deploying the firmware your Duo will run into Safe Mode. E.g.:
+
+    DuoSetupCLI --upload -f duo-system-part1-v0.2.3.bin -f duo-system-part2-v0.2.3.bin -s -l
+
+- Command(e.g.):
+
         DuoSetupCLI --upload -f duo-user-part-v0.2.3.bin -l
-        DuoSetupCLI --upload -f duo-fac-tinker-v0.2.3.bin -r 8
 
-Report(e.g.):
+- Report(e.g.):
 
-    Upload firmware to Duo.
-    Open file "Blink.bin"
-    Check file validity:
+		Upload image duo-user-part.bin to 0x0 of the OTA region.
+		Open file "duo-user-part.bin"
+		Check file validity:
+		
+		        Target Platform         : RedBear Duo
+		        Module function         : User part
+		        Module index            : 1
+		        Module dependency       : System part
+		        Module dependency index : 2
+		        Module start address    : 0x80c0000
+		        Module end address      : 0x80c183c
+		
+		File length : 6208
+		Upload  [=========================] 100% 6208 bytes
+		Upload done.
+		Selected file is uploaded successfully.
+	
+	    Leave listening mode...
 
-        Platform ID             : 88
-        Module function         : MOD_FUNC_USER_PART
-        Module index            : 1
-        Module dependency       : MOD_FUNC_SYSTEM_PART
-        Module dependency index : 2
-        Module start address    : 0x80c0000
-        Module and address      : 0x80c0c44
+#### Fetch Firmware Version
 
-    File length : 3144
-    File will be stored from offset 0x00 0f the OTA region.
-    Upload  [==========================] 100%  3144 bytes
-    Upload done.
-    Selected file is uploaded successfully.
+- Command:  
 
-    Leave listening mode...
+        DuoSetupCLI --version
 
-### Fetch Firmware Version
+- Report(e.g.):
 
-Command:  
+        Fetch firmware versions.
 
-    DuoSetupCLI --version
+            Release      : 0.2.3
+            Bootloader   : 3
+            System part1 : 6
+            System part2 : 6
+            User part    : 6
 
-Report(e.g.):
+#### Fetch Device ID
 
-    Fetch firmware versions.
+- Command:   
 
-        Release      : 0.2.3
-        Bootloader   : 3
-        System part1 : 6
-        System part2 : 6
-        User part    : 6
+        DuoSetupCLI --device-id
 
-### Fetch Device ID
+- Report(e.g.):   
 
-Command:   
-
-    DuoSetupCLI --device-id
-
-Report(e.g.):   
-
-    Fetch device ID.
-
-        Device ID : 24004xxxxC47353033323637
-        Claimed   : NO
+	    Fetch device ID.
+	
+	        Device ID : 24004xxxxC47353033323637
+	        Claimed   : NO
 
 
-### Check Credentials
+#### Check Credentials
 
-Command: 
+- Command: 
 
-    DuoSetupCLI --credentials
+        DuoSetupCLI --credentials
 
-Report(e.g.):
+- Report(e.g.):
 
-    Check credential.
+	    Check credential.
+	
+	        Has credentials : YES
 
-        Has credentials : YES
+#### Scan AP
 
-### Scan AP
+- Command: 
 
-Command: 
+        DuoSetupCLI --scan-ap
 
-    DuoSetupCLI --scan-ap
+- Report(e.g.):
 
-Report(e.g.):
+	    Scan Access Points.
+	
+	        SSID             RSSI    Security      Channel  MDR
+	        ----             ----    --------      -------  ---
+	    01. Dong mac         -53dBm  WPA2_AES_PSK     11    216KB/s
+	    02. AP-02_2.4G       -59dBm  WPA2_AES_PSK     5     300KB/s
+	    03. RedBear          -41dBm  WPA2_MIXED_PSK   6     130KB/s
 
-    Scan Access Points.
+#### Connect AP
 
-        SSID             RSSI    Security      Channel  MDR
-        ----             ----    --------      -------  ---
-    01. Dong mac         -53dBm  WPA2_AES_PSK     11    216KB/s
-    02. AP-02_2.4G       -59dBm  WPA2_AES_PSK     5     300KB/s
-    03. RedBear          -41dBm  WPA2_MIXED_PSK   6     130KB/s
+- Command:
 
-### Connect AP
+        DuoSetupCLI --connect-ap
 
-Command:
+- Report:
 
-    DuoSetupCLI --connect-ap
+	    Connect to Access Point.
+	
+	        Result : 0
 
-Report:
+#### Fetch Device Public Key
 
-    Connect to Access Point.
+- Command:
 
-        Result : 0
+        DuoSetupCLI --public-key
 
-### Fetch Device Public Key
+- Report(e.g.):
 
-Command:
-
-    DuoSetupCLI --public-key
-
-Report(e.g.):
-
-    Fetch device public key.
-
-        Device public key : 308123546754567......
+	    Fetch device public key.
+	
+	        Device public key : 308123546754567......
     
 ## Build DuoSetupCLI
 ---
 
-### Dependencies
+#### Dependencies
 
 Build tools and GCC Tools chain
 
-### Build
+#### Build
 Git clone the repository or download it to your local system. Open command line terminal and change the working directory to `./DuoSetupCLI`.
 
 Run `make` to build the `DuoSetupCLI`. The built program is under `./DuoSetupCLI/build`.
