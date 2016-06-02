@@ -58,13 +58,13 @@ typedef struct module_info_t {
 
 // Variables
 const char *module_func[7] = {
-    "MOD_FUNC_NONE",
-    "MOD_FUNC_RESOURCE",
-    "MOD_FUNC_BOOTLOADER",
-    "MOD_FUNC_MONO_FIRMWARE",
-    "MOD_FUNC_SYSTEM_PART",
-    "MOD_FUNC_USER_PART",
-    "MOD_FUNC_SETTINGS"
+    "Null",
+    "Resource",
+    "Bootloader",
+    "Monolithic firmware",
+    "System part",
+    "User part",
+    "Settings"
 };
 
 static int CheckFileValidity(uint8_t *firmware);
@@ -235,7 +235,10 @@ static int CheckFileValidity(uint8_t *firmware){
 }
 
 static void PrintModuleInfo(module_info_t *module_info){
-    printf("\n\tPlatform ID             : %d\n", module_info->platform_id);
+    if(module_info->platform_id == 88)
+        printf("\n\tTarget Platform         : RedBear Duo\n");
+    else
+        printf("\n\tTarget Platform         : Unknown\n");
     
     if(module_info->module_function > 6)
         printf("\tModule function         : Unknown module function.\n");
