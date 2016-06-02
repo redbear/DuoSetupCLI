@@ -102,7 +102,7 @@ int ParseCmdlineParameters(int arg, char *argv[]) {
                 return -1;
             }
         }
-        else if ( (!strcmp(argv[i], "--factory")) || (!strcmp(argv[i], "-fac")) ) {    // --factory
+        else if ( !strcmp(argv[i], "-fac") ) {    // -fac
             i++;
             if (i < arg) {
                 char form[5] = ".bin";
@@ -125,7 +125,7 @@ int ParseCmdlineParameters(int arg, char *argv[]) {
                 cmdline_params.fac_name = argv[i];
             }
             else {
-                printf("\nERROR: File is not specified by parameter \"--file\"!\n\n");
+                printf("\nERROR: File is not specified by parameter \"-fac\"!\n\n");
                 PrintHelpMessage();
                 return -1;
             }
@@ -165,7 +165,7 @@ void PrintHelpMessage(void) {
     printf("    --file,-f <file>  Used with --upload option. Specify the binary file\n");
     printf("                      (.bin) to be uploaded. The file will be stored from the\n");
     printf("                      beginning of the OTA region.\n");
-    printf("    --fac <file>      Used with --upload option. Specify the binary file\n");
+    printf("    -fac <file>       Used with --upload option. Specify the binary file\n");
     printf("                      (.bin) to be uploaded. The file will be stored from the\n");
     printf("                      beginning of the FAC region\n");
     printf("    --safe,-s         Used with --upload option. Invalid user part so that\n");

@@ -119,7 +119,7 @@ int main(int arg, char *argv[]) {
     
     switch (cmdline_option) {
         case OPTION_UPLOAD_FIRMWARE:
-            if (cmdline_params.file_num != 0) {
+            if (cmdline_params.file_num != 0 || cmdline_params.fac_set) {
                 printf("Upload firmware to Duo.\n");
                 
                 // Upload firmware
