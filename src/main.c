@@ -138,7 +138,10 @@ int main(int arg, char *argv[]){
                             if(curr_addr % OTA_REGION_UNIT_SIZE == 0) region_idx = curr_addr / OTA_REGION_UNIT_SIZE;
                             else region_idx = (curr_addr / OTA_REGION_UNIT_SIZE) + 1;
                         }
-                        else printf("\nERROR: Upload file failed!\n");
+                        else {
+                            printf("\nERROR: Upload file failed!\n");
+                            break;
+                        }
                     }
                     file_idx++;
                 }
@@ -234,17 +237,12 @@ static uint32_t UploadFirmware(char *file_name, uint32_t chunk_addr, uint8_t fil
     }
     
     AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, file_store);
-    uint8_t i;
-    for(i=0; i<3; i++) {
-        if(i > 0) printf("\nRetrying...\n");
-        if(SendJSONCmd(jsonString, respond, sizeof(respond)) < 0) continue;
-        if(cmdline_params.verbose) printf("\nJSON request command is sent successfully.\n");
-        if( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) continue;
-        break;
-    }
+
+    if(SendJSONCmd(jsonString, respond, sizeof(respond)) < 0) return 0;
+    if(cmdline_params.verbose) printf("\nJSON request command is sent successfully.\n");
     
-    if(i == 3) return 0;
-    
+    if( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) return 0;
+
     return fileLength;
 }
 
