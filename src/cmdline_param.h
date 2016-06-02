@@ -32,7 +32,7 @@ typedef enum {
     OPTION_CONFIG_AP,
     OPTION_CONNECT_AP,
     OPTION_PUBLIC_KEY,
-}CmdlineOptions_t;    
+} CmdlineOptions_t;    
 
 typedef struct {
     uint8_t file_num;
@@ -42,7 +42,7 @@ typedef struct {
     uint8_t safe;
     uint8_t leave;
     uint8_t verbose;
-}CmdLineParams_t;        
+} CmdLineParams_t;        
 
 extern CmdlineOptions_t cmdline_option;
 extern CmdLineParams_t cmdline_params;

@@ -31,9 +31,9 @@ CmdlineOptions_t cmdline_option;
 CmdLineParams_t cmdline_params;
 
 // Functions achievement
-int ParseCmdlineParameters(int arg, char *argv[]){
+int ParseCmdlineParameters(int arg, char *argv[]) {
 
-    if(arg < 2){
+    if (arg < 2) {
         printf("\nError: Invalid parameters!\n\n");
         PrintHelpMessage();
         return -1;
@@ -41,39 +41,38 @@ int ParseCmdlineParameters(int arg, char *argv[]){
     
     memset(&cmdline_params, 0x00, sizeof(CmdLineParams_t));
     
-    for(uint8_t i=1; i<arg; i++)
-    {
-        if( !strcmp(argv[i], "--upload") ) {     // --upload
-            if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_UPLOAD_FIRMWARE;
+    for (uint8_t i = 1; i < arg; i++) {
+        if ( !strcmp(argv[i], "--upload") ) {     // --upload
+            if (cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_UPLOAD_FIRMWARE;
         }
-        else if( !strcmp(argv[i], "--version") ) {    // --version
+        else if ( !strcmp(argv[i], "--version") ) {    // --version
             if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_FETCH_VERSIONS;
         }
-        else if( !strcmp(argv[i], "--device-id") ) {    // --device-id
-            if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_FETCH_DEV_ID;
+        else if ( !strcmp(argv[i], "--device-id") ) {    // --device-id
+            if (cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_FETCH_DEV_ID;
         }
-        else if(!strcmp(argv[i], "--credential")) {    // --credential
-            if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CHECK_CREDENTIAL;
+        else if (!strcmp(argv[i], "--credential")) {    // --credential
+            if (cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CHECK_CREDENTIAL;
         }
-        else if(!strcmp(argv[i], "--scan-ap")) {    // --scan-ap
-            if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_SCAN_AP;
+        else if (!strcmp(argv[i], "--scan-ap")) {    // --scan-ap
+            if (cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_SCAN_AP;
         }
         else if(!strcmp(argv[i], "--config-ap")) {    // --config-ap
             if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CONFIG_AP;
         }
-        else if(!strcmp(argv[i], "--connect-ap")) {    // --connect-ap
-            if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CONNECT_AP;
+        else if (!strcmp(argv[i], "--connect-ap")) {    // --connect-ap
+            if (cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_CONNECT_AP;
         }
         else if(!strcmp(argv[i], "--public-key")) {    // --public-key
             if(cmdline_option == OPTION_NOT_SPECIFIED) cmdline_option = OPTION_PUBLIC_KEY;
         }
-        else if( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
+        else if ( (!strcmp(argv[i], "--verbose")) || (!strcmp(argv[i], "-v")) ) {    // --verbose
             cmdline_params.verbose = 1;
         }
-        else if( (!strcmp(argv[i], "--file")) || (!strcmp(argv[i], "-f")) ) {    // --file
+        else if ( (!strcmp(argv[i], "--file")) || (!strcmp(argv[i], "-f")) ) {    // --file
             i++;
-            if(i < arg) {
-                if(cmdline_params.file_num >= MAX_OTA_FILE_NUM) {
+            if (i < arg) {
+                if (cmdline_params.file_num >= MAX_OTA_FILE_NUM) {
                     printf("\nERROR: Too many file to be uploaded while the OTA region\n");
                     printf("       is only capable of storing %d images simultaneously!\n\n", cmdline_params.file_num);
                     return -1;
@@ -81,7 +80,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
                 char form[5] = ".bin";
                 char format[5] = "    ";
                 int fLen = strlen(argv[i]);
-                if(fLen < 5){
+                if (fLen < 5) {
                     printf("\nERROR: The selcted file \"%s\" is invalid!\n\n", argv[i]);
                     return -1;  
                 }
@@ -89,7 +88,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
                 format[2] = argv[i][fLen-2];
                 format[1] = argv[i][fLen-3];
                 format[0] = argv[i][fLen-4];
-                if(0 != strcmp(form, format)){
+                if (0 != strcmp(form, format)) {
                     printf("\nERROR: Selected file \"%s\" format must be .bin!\n\n", argv[i]);
                     return -1;
                 }
@@ -103,13 +102,13 @@ int ParseCmdlineParameters(int arg, char *argv[]){
                 return -1;
             }
         }
-        else if( (!strcmp(argv[i], "--factory")) || (!strcmp(argv[i], "-fac")) ) {    // --factory
+        else if ( (!strcmp(argv[i], "--factory")) || (!strcmp(argv[i], "-fac")) ) {    // --factory
             i++;
-            if(i < arg) {
+            if (i < arg) {
                 char form[5] = ".bin";
                 char format[5] = "    ";
                 int fLen = strlen(argv[i]);
-                if(fLen < 5){
+                if (fLen < 5) {
                     printf("\nERROR: The selcted file \"%s\" is invalid!\n\n", argv[i]);
                     return -1;  
                 }
@@ -117,7 +116,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
                 format[2] = argv[i][fLen-2];
                 format[1] = argv[i][fLen-3];
                 format[0] = argv[i][fLen-4];    
-                if(0 != strcmp(form, format)){
+                if (0 != strcmp(form, format)) {
                     printf("\nERROR: Selected file \"%s\" format must be .bin!\n\n", argv[i]);
                     return -1;
                 }
@@ -131,10 +130,10 @@ int ParseCmdlineParameters(int arg, char *argv[]){
                 return -1;
             }
         }
-        else if( (!strcmp(argv[i], "--safe")) || (!strcmp(argv[i], "-s")) ) {    // --safe
+        else if ( (!strcmp(argv[i], "--safe")) || (!strcmp(argv[i], "-s")) ) {    // --safe
             cmdline_params.safe = 1;
         }
-        else if( (!strcmp(argv[i], "--leave")) || (!strcmp(argv[i], "-l")) ) {    // --leave
+        else if ( (!strcmp(argv[i], "--leave")) || (!strcmp(argv[i], "-l")) ) {    // --leave
             cmdline_params.leave = 1;
         }
         else {
@@ -147,7 +146,7 @@ int ParseCmdlineParameters(int arg, char *argv[]){
     return 0;
 }
 
-void PrintHelpMessage(void){
+void PrintHelpMessage(void) {
     printf("\nUsage   : %s <option> [parameters]\n\n", "DuoSetupCLI");
     
     printf("options: \n");

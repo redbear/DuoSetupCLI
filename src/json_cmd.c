@@ -25,7 +25,7 @@
 #include "cmdline_param.h"
 #include "communication.h"
 
-#define MAX_JSON_CMD_LENGTH           256
+#define MAX_JSON_CMD_LENGTH    256
 
 static void __itoa_(uint32_t num, char *str);
 
@@ -217,7 +217,7 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len) {
     int timeout = 5000; // In milliseconds
     
     SOCKET sclient;
-    if( ConnectToClient(&sclient, DUO_SERVER_IP_ADDRESS, DUO_SERVER_CMD_PORT) < 0 ){
+    if ( ConnectToClient(&sclient, DUO_SERVER_IP_ADDRESS, DUO_SERVER_CMD_PORT) < 0 ) {
         return -1;
     }
     
@@ -225,10 +225,9 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len) {
     setsockopt(sclient,SOL_SOCKET,SO_RCVTIMEO,(const char*)&timeout,sizeof(timeout));
     
     // Send request
-    if(cmdline_params.verbose) printf("\nSend json request command:\n\n%s\n\n", js);
+    if (cmdline_params.verbose) printf("\nSend json request command:\n\n%s\n\n", js);
     
-    if(send(sclient, js, strlen(js), 0) == SOCKET_ERROR)
-    {
+    if (send(sclient, js, strlen(js), 0) == SOCKET_ERROR) {
         printf("\nERROR: Sent request command failed!\n");
         closesocket(sclient);
         WSACleanup();
@@ -238,14 +237,13 @@ int SendJSONCmd(char *js, char *rsp, uint16_t rsp_len) {
     // Receive respond
     int ret = recv(sclient, rsp, rsp_len, 0);
     rsp[ret] = '\0';
-    if(ret <= 0)
-    {
+    if (ret <= 0) {
         printf("\nERROR: Receive respond timeout!\n");
         closesocket(sclient);
         WSACleanup();
         return -1;
     }
-    if(cmdline_params.verbose) printf("\nReceived: %s\n", rsp);
+    if (cmdline_params.verbose) printf("\nReceived: %s\n", rsp);
     
     closesocket(sclient);
     WSACleanup();
@@ -257,18 +255,17 @@ static void __itoa_(uint32_t num, char *str) {
     char index[] = "0123456789";
     int i = 0, j;
 
-    do{
+    do {
         str[i++] = index[ num % 10 ];
         num /= 10;
-    }while(num);
+    }while (num);
 
     char temp;
-    for(j=0; j<=(i-1)/2; j++){
+    for (j = 0; j <= (i-1)/2; j++) {
         temp = str[j];
         str[j] = str[i-1-j];
         str[i-1-j] = temp;
     }
-    
     str[i]='\0';
     
     return;

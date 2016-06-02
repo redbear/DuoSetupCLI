@@ -42,8 +42,7 @@
 #define TKIP_ENABLED       0x0002
 #define AES_ENABLED        0x0004
 
-typedef enum
-{
+typedef enum {
     WICED_SECURITY_OPEN           = 0,                                                                   /**< Open security                                         */
     WICED_SECURITY_WEP_PSK        = WEP_ENABLED,                                                         /**< WEP PSK Security with open authentication             */
     WICED_SECURITY_WEP_SHARED     = ( WEP_ENABLED   | SHARED_ENABLED ),                                  /**< WEP PSK Security with shared authentication           */
@@ -76,7 +75,7 @@ typedef struct {
     int32_t sec;
     uint8_t ch;
     uint32_t mdr;
-}Scan_result_t;
+} Scan_result_t;
 
 Scan_result_t scan_result[MAX_SCAN_RECORD];
 uint8_t scan_result_cnt = 0;
@@ -99,7 +98,7 @@ static int InvalidUserPart(void);
 static int LeaveListeningMode(void);
 
 // Functions achievement
-int main(int arg, char *argv[]){
+int main(int arg, char *argv[]) {
     int16_t result = -1;
 
     printf("Copyright (c) 2016 redbear.cc\n");
@@ -115,17 +114,17 @@ int main(int arg, char *argv[]){
 
     cmdline_params.file_num = 0;
 
-    if(ParseCmdlineParameters(arg, argv) < 0)
+    if (ParseCmdlineParameters(arg, argv) < 0)
         return -1;
     
-    switch(cmdline_option) {
+    switch (cmdline_option) {
         case OPTION_UPLOAD_FIRMWARE:
-            if(cmdline_params.file_num != 0) {
+            if (cmdline_params.file_num != 0) {
                 printf("Upload firmware to Duo.\n");
                 
                 // Upload firmware
-                while(file_idx < cmdline_params.file_num) { 
-                    if(region_idx >= OTA_REGION_UNIT_CNT) {
+                while (file_idx < cmdline_params.file_num) { 
+                    if (region_idx >= OTA_REGION_UNIT_CNT) {
                         printf("\nERROR: No OTA region available!\n");
                         break;
                     }
@@ -133,9 +132,9 @@ int main(int arg, char *argv[]){
                         curr_addr = region_idx * OTA_REGION_UNIT_SIZE;
                         printf("\nUpload image %s to 0x%x of the OTA region.\n", cmdline_params.file_name[file_idx], curr_addr);
                         file_len = UploadFirmware(cmdline_params.file_name[file_idx], curr_addr, 0); // 0: FIRMWARE
-                        if(file_len != 0) {
+                        if (file_len != 0) {
                             curr_addr += file_len;
-                            if(curr_addr % OTA_REGION_UNIT_SIZE == 0) region_idx = curr_addr / OTA_REGION_UNIT_SIZE;
+                            if (curr_addr % OTA_REGION_UNIT_SIZE == 0) region_idx = curr_addr / OTA_REGION_UNIT_SIZE;
                             else region_idx = (curr_addr / OTA_REGION_UNIT_SIZE) + 1;
                         }
                         else {
@@ -147,19 +146,19 @@ int main(int arg, char *argv[]){
                 }
                 
                 // Upload factory reset firmware
-                if(cmdline_params.fac_set) {
+                if (cmdline_params.fac_set) {
                     printf("Upload factory reset image %s to the FAC region.\n", cmdline_params.fac_name);
                     file_len = UploadFirmware(cmdline_params.fac_name, FAC_REGION_ADDR, 1); // 1: SYSTEM
-                    if(file_len == 0) {
+                    if (file_len == 0) {
                         printf("\nERROR: Upload file failed!\n");
                     }
                 }
                 
-                if(cmdline_params.safe) {
+                if (cmdline_params.safe) {
                     printf("\nInvalid user part...\n");
                     InvalidUserPart();
                 }
-                if(cmdline_params.leave) {
+                if (cmdline_params.leave) {
                     printf("\nLeave listening mode...\n");
                     LeaveListeningMode();
                 }
@@ -188,7 +187,7 @@ int main(int arg, char *argv[]){
             
         case OPTION_SCAN_AP:
             printf("Scan Access Points.\n");
-            for(uint8_t i=0; i<MAX_SCAN_RECORD; i++) {
+            for (uint8_t i = 0; i < MAX_SCAN_RECORD; i++) {
                 memset(&scan_result[i], 0x00, sizeof(Scan_result_t));
             }
             result = ScanNetworks(scan_result, &scan_result_cnt);
@@ -226,22 +225,22 @@ static uint32_t UploadFirmware(char *file_name, uint32_t chunk_addr, uint8_t fil
     uint8_t fileData[MAX_FILE_LENGTH];
     uint32_t fileLength = 0;
     
-    if(PrepareUpload(file_name, fileData, &fileLength) < 0)
+    if (PrepareUpload(file_name, fileData, &fileLength) < 0)
         return 0;
     
-    if(file_store == 0) {
-        if((chunk_addr + fileLength) > MAX_OTA_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of OTA region!\n");
+    if (file_store == 0) {
+        if ((chunk_addr + fileLength) > MAX_OTA_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of OTA region!\n");
     }
     else {
-        if((chunk_addr + fileLength) > MAX_FAC_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of FAC region!\n");
+        if ((chunk_addr + fileLength) > MAX_FAC_REGION_ADDR) printf("\nERROR: Can not fill the image to the rest memory of FAC region!\n");
     }
     
     AssembleOtaCmdString(jsonString, fileLength, chunk_addr, chunk_size, file_store);
 
-    if(SendJSONCmd(jsonString, respond, sizeof(respond)) < 0) return 0;
-    if(cmdline_params.verbose) printf("\nJSON request command is sent successfully.\n");
+    if (SendJSONCmd(jsonString, respond, sizeof(respond)) < 0) return 0;
+    if (cmdline_params.verbose) printf("\nJSON request command is sent successfully.\n");
     
-    if( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) return 0;
+    if ( OTAUploadFirmware(fileData, fileLength, chunk_size) < 0 ) return 0;
 
     return fileLength;
 }
@@ -277,9 +276,11 @@ static int FetchFirmwareVersion(void) {
     AssembleVerCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             printf("\n");
             printf("    Release      : %s\n", cJSON_GetObjectItem(json, "release string")->valuestring);
@@ -304,13 +305,15 @@ static int FetchDeviceID(void) {
     AssembleDevidCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             printf("\n");
             printf("    Device ID : %s\n", cJSON_GetObjectItem(json, "id")->valuestring);
-            if( !strcmp("1", cJSON_GetObjectItem(json, "c")->valuestring) ) 
+            if ( !strcmp("1", cJSON_GetObjectItem(json, "c")->valuestring) ) 
                 printf("    Claimed   : YES\n");
             else
                 printf("    Claimed   : NO\n");
@@ -331,12 +334,14 @@ static int CheckCredential(void) {
     AssembleChkCredentCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             printf("\n");
-            if( 1 == cJSON_GetObjectItem(json, "has credentials")->valueint ) 
+            if ( 1 == cJSON_GetObjectItem(json, "has credentials")->valueint ) 
                 printf("    Has credentials : YES\n");
             else
                 printf("    Has credentials : NO\n");
@@ -357,9 +362,11 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
     AssembleScanApCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             array = cJSON_GetObjectItem(json, "scans");
             *scan_result_cnt = cJSON_GetArraySize( array );
@@ -367,7 +374,7 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
             printf( "\n    SSID                             RSSI    Security       Channel  MDR");
             printf( "\n    ----                             ----    --------       -------  ---\n");
             
-            for(uint8_t i=0; i<*scan_result_cnt; i++) {
+            for (uint8_t i = 0; i < *scan_result_cnt; i++) {
                 object = cJSON_GetArrayItem(array, i);
                 
                 char *ssid = cJSON_GetObjectItem(object, "ssid")->valuestring;
@@ -375,8 +382,8 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
                 scan_result[i].ssid[strlen(ssid)] = '\0';
                 printf("%02d. ", i+1);
                 uint8_t ssid_len = strlen(scan_result[i].ssid);
-                for(uint8_t j=0; j<MAX_SSID_LENGTH; j++) {
-                    if(j<ssid_len)
+                for (uint8_t j = 0; j < MAX_SSID_LENGTH; j++) {
+                    if (j < ssid_len)
                         printf("%c", scan_result[i].ssid[j]);
                     else
                         printf(" ");
@@ -384,13 +391,13 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
                 
                 scan_result[i].rssi = cJSON_GetObjectItem(object, "rssi")->valueint;
                 printf("%ddBm", scan_result[i].rssi);
-                if(scan_result[i].rssi > -10) printf("   ");
-                else if(scan_result[i].rssi > -100) printf("  ");
+                if (scan_result[i].rssi > -10) printf("   ");
+                else if (scan_result[i].rssi > -100) printf("  ");
                 else printf(" ");
                 
                 char sec_str[18];
                 scan_result[i].sec = cJSON_GetObjectItem(object, "sec")->valueint;
-                switch(scan_result[i].sec) {
+                switch (scan_result[i].sec) {
                     case WICED_SECURITY_OPEN:           strcpy(sec_str, "OPEN"); break;
                     case WICED_SECURITY_WEP_PSK:        strcpy(sec_str, "WEP_PSK"); break;
                     case WICED_SECURITY_WEP_SHARED:     strcpy(sec_str, "WEP_SHARED"); break;
@@ -411,8 +418,8 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
                     case WICED_SECURITY_WPS_SECURE:     strcpy(sec_str, "WPS_SECURE"); break;
                     default:                            strcpy(sec_str, "UNKNOWN"); break;
                 }
-                for(uint8_t j=0; j<18; j++) {
-                    if(j < strlen(sec_str))
+                for (uint8_t j = 0; j < 18; j++) {
+                    if (j < strlen(sec_str))
                         printf("%c", sec_str[j]);
                     else
                         printf(" ");
@@ -420,11 +427,11 @@ static int ScanNetworks(Scan_result_t *scan_result, uint8_t *scan_result_cnt) {
                 
                 scan_result[i].ch = cJSON_GetObjectItem(object, "ch")->valueint;
                 printf("%d", scan_result[i].ch);
-                if(scan_result[i].ch < 10) printf("     ");
-                else if(scan_result[i].ch < 100) printf("    ");
+                if (scan_result[i].ch < 10) printf("     ");
+                else if (scan_result[i].ch < 100) printf("    ");
                 else printf("   ");
                 
-                scan_result[i].mdr = cJSON_GetObjectItem(object, "mdr")->valueint/1000;
+                scan_result[i].mdr = cJSON_GetObjectItem(object, "mdr")->valueint / 1000;
                 printf("%dKB/s\n", scan_result[i].mdr);
             }
             
@@ -441,21 +448,21 @@ static int ConfigAP(void) {
     cJSON *json;
     int result = -1;
     
-    for(uint8_t i=0; i<MAX_SCAN_RECORD; i++) {
+    for (uint8_t i = 0; i < MAX_SCAN_RECORD; i++) {
         memset(&scan_result[i], 0x00, sizeof(Scan_result_t));
     }
     char scan_again = 'n';
     do {
         printf("Scanning networks ...\n");
         result = ScanNetworks(scan_result, &scan_result_cnt);
-        if(result == 0) {
+        if (result == 0) {
             printf("\nScan again?(y/n):");
             scan_again = getchar();
-            while(getchar() != '\n'); // Clear the stdin
+            while (getchar() != '\n'); // Clear the stdin
         }
-    }while(scan_again == 'y' && result == 0);
+    }while (scan_again == 'y' && result == 0);
     
-    if(result == 0) {
+    if (result == 0) {
         uint8_t idx = 0;
         char ssid[MAX_SSID_LENGTH];
         int32_t security = WICED_SECURITY_OPEN;
@@ -466,9 +473,9 @@ static int ConfigAP(void) {
         printf("or input '0' to manually config the AP that not in the list: ");
 
         scanf("%d", &idx);
-        while(getchar() != '\n'); // Clear the stdin
+        while (getchar() != '\n'); // Clear the stdin
         
-        if(idx > 0 && idx <= scan_result_cnt) {
+        if (idx > 0 && idx <= scan_result_cnt) {
             memcpy(ssid, scan_result[idx].ssid, sizeof(ssid));
             security = scan_result[idx].sec;
         }
@@ -478,37 +485,36 @@ static int ConfigAP(void) {
             char c, num = 0;
             do {
                 c = getchar();
-                if(c != '\n') {
+                if (c != '\n') {
                     ssid[num] = c;
                     num++;
                 }
-            }
-            while(c != '\n');
+            }while (c != '\n');
             ssid[num] = '\0';
             
             printf("Security 0=unsecured, 1=WEP, 2=WPA, 3=WPA2: ");
             scanf("%d", &security);
-            if(security == 0) 
+            if (security == 0) 
                 security = WICED_SECURITY_OPEN;
-            else if(security == 1) {
+            else if (security == 1) {
                 security = WICED_SECURITY_WEP_PSK;
             }
-            else if(security == 2 || security == 3) {
-                if(security == 2) 
+            else if (security == 2 || security == 3) {
+                if (security == 2) 
                     security = WPA_SECURITY;
                 else 
                     security = WPA2_SECURITY;
                 printf("Security Cipher 1=AES, 2=TKIP, 3=AES+TKIP: ");
                 scanf("%d", &cipher);
-                if(cipher == 1) 
+                if (cipher == 1) 
                     security |= AES_ENABLED;
-                else if(cipher == 2) 
+                else if (cipher == 2) 
                     security |= TKIP_ENABLED;
                 else 
                     security |= AES_ENABLED|TKIP_ENABLED;
             }
         }
-        if(security != WICED_SECURITY_OPEN) {
+        if (security != WICED_SECURITY_OPEN) {
             printf("Password: ");
             scanf("%s", password);
         }
@@ -516,9 +522,11 @@ static int ConfigAP(void) {
         AssembleConfigApCmdString(jsonString, ssid, security, password);
         result = SendJSONCmd(jsonString, respond, sizeof(respond));
         
-        if(result == 0) {
-            json=cJSON_Parse((const char *)respond);
-            if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+        if (result == 0) {
+            json = cJSON_Parse((const char *)respond);
+            if (!json) {
+                printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+            }
             else {
                 printf("\n");
                 printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
@@ -539,9 +547,11 @@ static int ConnectAP(void) {
     AssembleConnectApCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             printf("\n");
             printf("    Result : %d\n", cJSON_GetObjectItem(json, "r")->valueint);
@@ -561,12 +571,14 @@ static int FetchDevicePublicKey(void) {
     AssemblePublicKeyCmdString(jsonString);
     result = SendJSONCmd(jsonString, respond, sizeof(respond));
     
-    if(result == 0) {
-        json=cJSON_Parse((const char *)respond);
-        if (!json) {printf("Error before: [%s]\n",cJSON_GetErrorPtr());}
+    if (result == 0) {
+        json = cJSON_Parse((const char *)respond);
+        if (!json) {
+            printf("Error before: [%s]\n", cJSON_GetErrorPtr());
+        }
         else {
             printf("\n");
-            if(cJSON_GetObjectItem(json, "r")->valueint != 1) 
+            if (cJSON_GetObjectItem(json, "r")->valueint != 1) 
                 printf("    Device public key : %s\n", cJSON_GetObjectItem(json, "b")->valuestring);
             else 
                 printf("Fetch device public key failed!\n");
